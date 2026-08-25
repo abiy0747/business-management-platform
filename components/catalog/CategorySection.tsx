@@ -1,70 +1,126 @@
+"use client";
+
+import Link from "next/link";
+import type { ComponentType } from "react";
 import {
-  BatteryCharging,
+  ArrowRight,
   Cable,
-  CircleUserRound,
   Headphones,
+  Package,
+  PlugZap,
   Smartphone,
 } from "lucide-react";
 
-const categories = [
-  {
-    name: "Cases",
-    icon: Smartphone,
-  },
-  {
-    name: "Chargers",
-    icon: BatteryCharging,
-  },
-  {
-    name: "Cables",
-    icon: Cable,
-  },
-  {
-    name: "Audio",
-    icon: Headphones,
-  },
-  {
-    name: "More",
-    icon: CircleUserRound,
-  },
-];
+type CategorySectionProps = {
+  categories: string[];
+  selectedCategory: string;
+};
 
-export default function CategorySection() {
+const categoryIcons: Record<
+  string,
+  ComponentType<{ size?: number; strokeWidth?: number; className?: string }>
+> = {
+  Cases: Smartphone,
+  Chargers: PlugZap,
+  Cables: Cable,
+  Audio: Headphones,
+};
+
+export default function CategorySection({
+  categories,
+  selectedCategory,
+}: CategorySectionProps) {
+  const visibleCategories = categories.slice(0, 4);
+
   return (
-    <section className="mt-8">
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-xl font-bold tracking-tight">
+    <section
+      id="categories"
+      className="mt-8"
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-black tracking-tight">
           Categories
         </h2>
 
-        <button className="text-sm font-semibold text-[#222022]">
-          See all →
-        </button>
+        <Link
+          href="/categories"
+          className="group flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-[#C3D809]"
+        >
+          See all
+          <ArrowRight
+            size={16}
+            className="transition-transform duration-300 group-hover:translate-x-1"
+          />
+        </Link>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
-        {categories.map((category) => {
-          const Icon = category.icon;
+      {/* Category list */}
+      <div className="mt-5 flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+        {visibleCategories.map((category) => {
+          const Icon =
+            categoryIcons[category] || Package;
+
+          const isActive =
+            selectedCategory.toLowerCase() ===
+            category.toLowerCase();
 
           return (
-            <button
-              key={category.name}
-              className="group flex min-w-[64px] flex-col items-center gap-2"
+            <Link
+              key={category}
+              href={`/catalog?category=${encodeURIComponent(
+                category
+              )}`}
+              className="group shrink-0"
             >
-              <span className="flex h-14 w-14 items-center justify-center rounded-2xl border border-black/10 bg-[#fafafa] transition-all duration-300 group-hover:-translate-y-1 group-hover:border-[#C3D809] group-hover:bg-[#C3D809] group-active:scale-95">
+              <div
+                className={`flex h-[84px] w-[84px] items-center justify-center rounded-[24px] border transition-all duration-300 ${
+                  isActive
+                    ? "border-[#C3D809] bg-[#C3D809] shadow-[0_12px_30px_rgba(195,216,9,0.18)]"
+                    : "border-black/10 bg-white hover:-translate-y-1 hover:border-[#C3D809]/50 hover:shadow-[0_12px_30px_rgba(34,32,34,0.07)]"
+                }`}
+              >
                 <Icon
-                  size={22}
+                  size={25}
                   strokeWidth={1.7}
-                  className="transition-transform duration-300 group-hover:scale-110"
+                  className={`transition-all duration-300 ${
+                    isActive
+                      ? "text-[#222022] scale-110"
+                      : "text-[#222022] group-hover:scale-110"
+                  }`}
                 />
-              </span>
+              </div>
 
-              <span className="text-xs font-semibold whitespace-nowrap">
-                {category.name}
-              </span>
-            </button>
+              <p
+                className={`mt-2 text-center text-xs font-bold transition-colors duration-300 ${
+                  isActive
+                    ? "text-[#222022]"
+                    : "text-black/60 group-hover:text-[#222022]"
+                }`}
+              >
+                {category}
+              </p>
+            </Link>
           );
         })}
+
+        {/* More */}
+        <Link
+          href="/categories"
+          className="group shrink-0"
+        >
+          <div className="flex h-[84px] w-[84px] items-center justify-center rounded-[24px] border border-black/10 bg-white transition-all duration-300 group-hover:-translate-y-1 group-hover:border-[#C3D809]/50 group-hover:shadow-[0_12px_30px_rgba(34,32,34,0.07)]">
+            <Package
+              size={25}
+              strokeWidth={1.7}
+              className="transition-transform duration-300 group-hover:scale-110"
+            />
+          </div>
+
+          <p className="mt-2 text-center text-xs font-bold text-black/60">
+            More
+          </p>
+        </Link>
       </div>
     </section>
   );
