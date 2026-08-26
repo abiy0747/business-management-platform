@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Bell, Heart, MapPin } from "lucide-react";
 
 export default function CatalogHeader() {
@@ -20,21 +21,25 @@ export default function CatalogHeader() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
+          {/* Favorites */}
+          <Link
+            href="/favorites"
             className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white transition-transform duration-200 active:scale-90"
             aria-label="Favorites"
           >
             <Heart size={19} strokeWidth={1.8} />
-          </button>
+          </Link>
 
-          <button
+          {/* Notifications */}
+          <Link
+            href="/notifications"
             className="relative flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white transition-transform duration-200 active:scale-90"
             aria-label="Notifications"
           >
             <Bell size={19} strokeWidth={1.8} />
 
             <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-[#C3D809]" />
-          </button>
+          </Link>
         </div>
       </div>
     </header>

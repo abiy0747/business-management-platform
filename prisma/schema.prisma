@@ -14,8 +14,9 @@ model Business {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  categories Category[]
-  products   Product[]
+  categories   Category[]
+  products     Product[]
+  notifications Notification[]
 }
 
 model Category {
@@ -55,4 +56,29 @@ model Product {
 
   @@index([businessId])
   @@index([categoryId])
+}
+
+
+model Notification {
+  id        String   @id @default(cuid())
+
+  title     String
+  message   String
+  type      String   @default("INFO")
+
+  discount  Decimal? @db.Decimal(5, 2)
+
+  isActive  Boolean  @default(true)
+
+  startDate DateTime?
+  endDate   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([isActive])
 }
