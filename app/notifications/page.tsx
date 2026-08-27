@@ -55,7 +55,7 @@ export default async function NotificationsPage() {
         {/* Header */}
         <header className="flex items-center gap-4 border-b border-black/5 px-5 py-5">
           <Link
-            href="/"
+            href="/catalog"
             className="flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white transition-transform active:scale-90"
             aria-label="Back"
           >

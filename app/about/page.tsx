@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -24,22 +25,25 @@ export default function AboutPage() {
   return (
     <main className="min-h-screen overflow-hidden bg-white pb-24 text-[#222022]">
       <div className="relative mx-auto max-w-md">
-        {/* Background decoration */}
+        {/* Background decorations */}
         <div className="pointer-events-none absolute -right-24 top-20 h-64 w-64 rounded-full bg-[#C3D809]/20 blur-3xl" />
 
         <div className="pointer-events-none absolute -left-24 top-[500px] h-64 w-64 rounded-full bg-black/[0.04] blur-3xl" />
 
-        {/* Header */}
+        {/* ========================================================= */}
+        {/* HEADER */}
+        {/* ========================================================= */}
+
         <motion.header
           initial={{ opacity: 0, y: -15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="relative z-10 flex items-center gap-3 px-5 pb-4 pt-6"
+          className="relative z-30 flex items-center gap-3 px-5 pb-4 pt-6"
         >
           <Link
             href="/catalog"
-            className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/80 backdrop-blur-xl transition-all duration-300 hover:-translate-x-1 hover:border-[#C3D809] hover:bg-[#C3D809] active:scale-90"
             aria-label="Back to catalog"
+            className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/80 backdrop-blur-xl transition-all duration-300 hover:-translate-x-1 hover:border-[#C3D809] hover:bg-[#C3D809] active:scale-90"
           >
             <ArrowLeft
               size={18}
@@ -58,95 +62,179 @@ export default function AboutPage() {
           </div>
         </motion.header>
 
-        {/* Hero */}
-        <section className="relative px-5 pt-6">
-          <motion.div
-            initial={{ opacity: 0, y: 30, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{
-              duration: 0.7,
-              ease: [0.22, 1, 0.36, 1],
-            }}
-            className="group relative overflow-hidden rounded-[30px] bg-[#222022] px-6 py-8 text-white shadow-[0_20px_60px_rgba(34,32,34,0.15)]"
-          >
-            {/* Animated glow */}
-            <motion.div
-              animate={{
-                x: [0, 25, 0],
-                y: [0, -15, 0],
-                scale: [1, 1.12, 1],
-              }}
-              transition={{
-                duration: 7,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-[#C3D809]/20 blur-3xl"
-            />
+       {/* Luxury Hero */}
+<section className="relative px-5 pt-6">
+  <motion.div
+    initial={{ opacity: 0, y: 30, scale: 0.97 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    transition={{
+      duration: 0.7,
+      ease: [0.22, 1, 0.36, 1],
+    }}
+    className="group relative h-[330px] overflow-hidden rounded-[30px] bg-[#222022] shadow-[0_25px_70px_rgba(34,32,34,0.18)]"
+  >
+    {/* ======================================================= */}
+    {/* LEFT SIDE — CONTENT */}
+    {/* ======================================================= */}
 
-            {/* Rotating circle */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{
-                duration: 18,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              className="pointer-events-none absolute -bottom-16 -right-16 h-40 w-40 rounded-full border border-[#C3D809]/20"
-            />
+    <div className="absolute inset-y-0 left-0 z-20 flex w-[62%] flex-col justify-center px-5">
+      {/* Animated glow */}
+      <motion.div
+        animate={{
+          x: [0, 10, 0],
+          y: [0, -8, 0],
+          scale: [1, 1.08, 1],
+        }}
+        transition={{
+          duration: 6,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full bg-[#C3D809]/15 blur-3xl"
+      />
 
-            <div className="relative z-10">
-              <motion.div
-                whileHover={{
-                  rotate: 8,
-                  scale: 1.08,
-                }}
-                transition={{ type: "spring", stiffness: 300 }}
-                className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#C3D809] text-[#222022] shadow-[0_10px_30px_rgba(195,216,9,0.2)]"
-              >
-                <Smartphone size={22} />
-              </motion.div>
+      {/* Icon */}
+      <motion.div
+        whileHover={{
+          rotate: 8,
+          scale: 1.08,
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 300,
+        }}
+        className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-[#C3D809] text-[#222022] shadow-[0_10px_30px_rgba(195,216,9,0.25)]"
+      >
+        <Smartphone size={20} />
+      </motion.div>
 
-              <p className="mt-7 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
-                Welcome to
-              </p>
+      <p className="mt-5 text-[9px] font-bold uppercase tracking-[0.2em] text-white/40">
+        Welcome to
+      </p>
 
-              <h2 className="mt-2 text-[32px] font-black leading-[1.05] tracking-tight">
-                {store.name}
-              </h2>
+      <h2 className="mt-2 text-[23px] font-black leading-[1.05] tracking-tight text-white">
+        {store.name}
+      </h2>
 
-              <p className="mt-4 max-w-[290px] text-sm leading-6 text-white/55">
-                Your destination for quality mobile accessories,
-                useful everyday tech, and products made to keep
-                you connected.
-              </p>
+      <p className="mt-3 text-[11px] leading-5 text-white/50">
+        Quality mobile accessories and useful everyday tech.
+      </p>
 
-              {/* Status badge */}
-              <motion.div
-                animate={{ y: [0, -6, 0] }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute bottom-0 right-0 flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-2 backdrop-blur-md"
-              >
-                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C3D809]" />
+      {/* Status */}
+      <motion.div
+        animate={{
+          y: [0, -4, 0],
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="mt-5 inline-flex w-fit items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-2 backdrop-blur-md"
+      >
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C3D809]" />
 
-                <span className="text-[9px] font-bold uppercase tracking-wider text-white/60">
-                  Open today
-                </span>
-              </motion.div>
-            </div>
-          </motion.div>
-        </section>
+        <span className="text-[8px] font-bold uppercase tracking-wider text-white/60">
+          Open today
+        </span>
+      </motion.div>
+    </div>
 
-        {/* Contact heading */}
+    {/* ======================================================= */}
+    {/* RIGHT SIDE — IMAGE */}
+    {/* ======================================================= */}
+
+    <div className="absolute inset-y-0 right-0 z-0 w-[60%] overflow-hidden">
+      <Image
+        src="/images/store.jpg"
+        alt="Your Mobile Store"
+        fill
+        priority
+        className="object-cover transition-transform duration-700 group-hover:scale-105"
+        sizes="60vw"
+      />
+
+      {/* Premium image overlay */}
+      <div className="absolute inset-0 bg-gradient-to-l from-transparent via-black/10 to-[#222022]/50" />
+
+      {/* Image shine */}
+      <motion.div
+        animate={{
+          x: ["-120%", "120%"],
+        }}
+        transition={{
+          duration: 3,
+          repeat: Infinity,
+          repeatDelay: 5,
+          ease: "easeInOut",
+        }}
+        className="pointer-events-none absolute inset-y-0 w-16 skew-x-[-20deg] bg-white/10 blur-md"
+      />
+    </div>
+
+    {/* ======================================================= */}
+    {/* SMOOTH CURVED SEPARATION */}
+    {/* ======================================================= */}
+
+    <div className="pointer-events-none absolute inset-y-0 left-[38%] z-10 w-[30%]">
+      <svg
+        viewBox="0 0 160 330"
+        preserveAspectRatio="none"
+        className="h-full w-full"
+      >
+        <path
+          d="
+            M 0 0
+            C 72 18, 108 65, 82 105
+            C 55 145, 48 178, 82 215
+            C 116 252, 105 298, 0 330
+            L 0 330
+            Z
+          "
+          fill="#222022"
+        />
+      </svg>
+    </div>
+
+    {/* ======================================================= */}
+    {/* SOFT CURVE EDGE */}
+    {/* ======================================================= */}
+
+    <div className="pointer-events-none absolute inset-y-0 left-[52%] z-20 w-3 opacity-20 blur-md">
+      <div className="h-full w-full rounded-full bg-black/30" />
+    </div>
+
+    {/* ======================================================= */}
+    {/* LOCATION BADGE */}
+    {/* ======================================================= */}
+
+    <div className="absolute bottom-4 left-4 z-30">
+      <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1.5 text-[8px] font-bold uppercase tracking-[0.15em] text-white/60 backdrop-blur-md">
+        Bahir Dar
+      </span>
+    </div>
+  </motion.div>
+</section>
+
+        {/* ========================================================= */}
+        {/* CONTACT HEADING */}
+        {/* ========================================================= */}
+
         <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+          initial={{
+            opacity: 0,
+            y: 20,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+          }}
+          transition={{
+            duration: 0.5,
+          }}
           className="px-5 pt-10"
         >
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/35">
@@ -160,18 +248,34 @@ export default function AboutPage() {
           </h2>
         </motion.section>
 
-        {/* Contact cards */}
+        {/* ========================================================= */}
+        {/* CONTACT CARDS */}
+        {/* ========================================================= */}
+
         <section className="space-y-3 px-5 pt-6">
           {/* Address */}
           <motion.a
             href="https://www.google.com/maps/search/?api=1&query=Bahir+Dar+Ethiopia"
             target="_blank"
             rel="noopener noreferrer"
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            whileHover={{ y: -4, scale: 1.01 }}
+            initial={{
+              opacity: 0,
+              x: -20,
+            }}
+            whileInView={{
+              opacity: 1,
+              x: 0,
+            }}
+            viewport={{
+              once: true,
+            }}
+            transition={{
+              duration: 0.5,
+            }}
+            whileHover={{
+              y: -4,
+              scale: 1.01,
+            }}
             className="group flex items-center gap-4 rounded-[24px] border border-black/10 bg-[#f8f8f6] p-5 transition-all duration-300 hover:border-[#C3D809]/50 hover:bg-white hover:shadow-[0_15px_40px_rgba(34,32,34,0.08)]"
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white transition-all duration-300 group-hover:bg-[#C3D809]">
@@ -197,11 +301,25 @@ export default function AboutPage() {
           {/* Phone */}
           <motion.a
             href={`tel:${store.phone.replace(/\s/g, "")}`}
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            whileHover={{ y: -4, scale: 1.01 }}
+            initial={{
+              opacity: 0,
+              x: -20,
+            }}
+            whileInView={{
+              opacity: 1,
+              x: 0,
+            }}
+            viewport={{
+              once: true,
+            }}
+            transition={{
+              duration: 0.5,
+              delay: 0.1,
+            }}
+            whileHover={{
+              y: -4,
+              scale: 1.01,
+            }}
             className="group flex items-center gap-4 rounded-[24px] border border-black/10 bg-[#f8f8f6] p-5 transition-all duration-300 hover:border-[#C3D809]/50 hover:bg-white hover:shadow-[0_15px_40px_rgba(34,32,34,0.08)]"
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white transition-all duration-300 group-hover:bg-[#C3D809]">
@@ -229,11 +347,25 @@ export default function AboutPage() {
             href={`https://wa.me/${store.whatsapp.replace(/\D/g, "")}`}
             target="_blank"
             rel="noopener noreferrer"
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            whileHover={{ y: -4, scale: 1.01 }}
+            initial={{
+              opacity: 0,
+              x: -20,
+            }}
+            whileInView={{
+              opacity: 1,
+              x: 0,
+            }}
+            viewport={{
+              once: true,
+            }}
+            transition={{
+              duration: 0.5,
+              delay: 0.2,
+            }}
+            whileHover={{
+              y: -4,
+              scale: 1.01,
+            }}
             className="group flex items-center gap-4 rounded-[24px] border border-black/10 bg-[#f8f8f6] p-5 transition-all duration-300 hover:border-[#C3D809]/50 hover:bg-white hover:shadow-[0_15px_40px_rgba(34,32,34,0.08)]"
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white transition-all duration-300 group-hover:bg-[#C3D809]">
@@ -258,11 +390,25 @@ export default function AboutPage() {
 
           {/* Opening hours */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            whileHover={{ y: -4, scale: 1.01 }}
+            initial={{
+              opacity: 0,
+              x: -20,
+            }}
+            whileInView={{
+              opacity: 1,
+              x: 0,
+            }}
+            viewport={{
+              once: true,
+            }}
+            transition={{
+              duration: 0.5,
+              delay: 0.3,
+            }}
+            whileHover={{
+              y: -4,
+              scale: 1.01,
+            }}
             className="group flex items-center gap-4 rounded-[24px] border border-black/10 bg-[#f8f8f6] p-5 transition-all duration-300 hover:border-[#C3D809]/50 hover:bg-white hover:shadow-[0_15px_40px_rgba(34,32,34,0.08)]"
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white transition-all duration-300 group-hover:bg-[#C3D809]">
@@ -281,12 +427,25 @@ export default function AboutPage() {
           </motion.div>
         </section>
 
-        {/* Social media */}
+        {/* ========================================================= */}
+        {/* SOCIAL MEDIA */}
+        {/* ========================================================= */}
+
         <motion.section
-          initial={{ opacity: 0, y: 25 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          initial={{
+            opacity: 0,
+            y: 25,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+          }}
+          transition={{
+            duration: 0.6,
+          }}
           className="px-5 pt-10"
         >
           <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-black/35">
@@ -296,8 +455,12 @@ export default function AboutPage() {
           <div className="mt-4 grid grid-cols-2 gap-3">
             {/* Instagram */}
             <motion.a
-              whileHover={{ y: -4 }}
-              whileTap={{ scale: 0.96 }}
+              whileHover={{
+                y: -4,
+              }}
+              whileTap={{
+                scale: 0.96,
+              }}
               href="#"
               className="group flex items-center gap-3 rounded-2xl border border-black/10 bg-[#f8f8f6] p-4 transition-all hover:bg-white hover:shadow-lg"
             >
@@ -315,46 +478,67 @@ export default function AboutPage() {
               />
             </motion.a>
 
-         {/* Telegram */}
-<motion.a
-  whileHover={{ y: -4 }}
-  whileTap={{ scale: 0.96 }}
-  href="#"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="group flex items-center gap-3 rounded-2xl border border-black/10 bg-[#f8f8f6] p-4 transition-all hover:bg-white hover:shadow-lg"
->
-  <div className="flex h-[18px] w-[18px] items-center justify-center rounded-md bg-[#222022] text-[8px] font-black text-white">
-    TG
-  </div>
+            {/* Telegram */}
+            <motion.a
+              whileHover={{
+                y: -4,
+              }}
+              whileTap={{
+                scale: 0.96,
+              }}
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center gap-3 rounded-2xl border border-black/10 bg-[#f8f8f6] p-4 transition-all hover:bg-white hover:shadow-lg"
+            >
+              <div className="flex h-[18px] w-[18px] items-center justify-center rounded-md bg-[#222022] text-[8px] font-black text-white">
+                TG
+              </div>
 
-  <span className="text-xs font-bold">
-    Telegram
-  </span>
+              <span className="text-xs font-bold">
+                Telegram
+              </span>
 
-  <ArrowUpRight
-    size={14}
-    className="ml-auto opacity-30 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-  />
-</motion.a>
+              <ArrowUpRight
+                size={14}
+                className="ml-auto opacity-30 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+              />
+            </motion.a>
           </div>
         </motion.section>
 
+        {/* ========================================================= */}
         {/* CTA */}
+        {/* ========================================================= */}
+
         <motion.section
-          initial={{ opacity: 0, y: 25 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          initial={{
+            opacity: 0,
+            y: 25,
+          }}
+          whileInView={{
+            opacity: 1,
+            y: 0,
+          }}
+          viewport={{
+            once: true,
+          }}
+          transition={{
+            duration: 0.6,
+          }}
           className="px-5 pb-8 pt-10"
         >
           <Link href="/catalog">
             <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.97 }}
+              whileHover={{
+                scale: 1.02,
+              }}
+              whileTap={{
+                scale: 0.97,
+              }}
               className="group relative overflow-hidden rounded-[24px] bg-[#C3D809] px-6 py-5 shadow-[0_15px_40px_rgba(195,216,9,0.15)]"
             >
-              {/* Animated shine */}
+              {/* Shine */}
               <motion.div
                 animate={{
                   x: ["-120%", "120%"],

@@ -1,4 +1,5 @@
 import "dotenv/config";
+
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@/app/generated/prisma/client";
 
@@ -11,7 +12,10 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  // Create the business
+  // =========================================================
+  // CREATE BUSINESS
+  // =========================================================
+
   const business = await prisma.business.create({
     data: {
       name: "Power Mobile",
@@ -21,7 +25,10 @@ async function main() {
 
   console.log("Business created:", business.name);
 
-  // Create categories
+  // =========================================================
+  // CREATE CATEGORIES
+  // =========================================================
+
   const cases = await prisma.category.create({
     data: {
       name: "Cases",
@@ -52,7 +59,10 @@ async function main() {
 
   console.log("Categories created");
 
-  // Create products
+  // =========================================================
+  // CREATE PRODUCTS
+  // =========================================================
+
   await prisma.product.createMany({
     data: [
       {
@@ -65,6 +75,7 @@ async function main() {
         businessId: business.id,
         categoryId: cases.id,
       },
+
       {
         name: "Samsung S24 Protective Case",
         description: "Slim shock-resistant case",
@@ -75,6 +86,7 @@ async function main() {
         businessId: business.id,
         categoryId: cases.id,
       },
+
       {
         name: "20W Fast Charger",
         description: "Fast USB-C wall charger",
@@ -85,6 +97,7 @@ async function main() {
         businessId: business.id,
         categoryId: chargers.id,
       },
+
       {
         name: "USB-C Fast Charging Cable",
         description: "Durable USB-C charging cable",
@@ -95,6 +108,7 @@ async function main() {
         businessId: business.id,
         categoryId: cables.id,
       },
+
       {
         name: "Wireless Earbuds",
         description: "Compact wireless Bluetooth earbuds",

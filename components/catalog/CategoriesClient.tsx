@@ -37,7 +37,18 @@ export default function CategoriesClient({
   return (
     <section className="grid grid-cols-2 gap-3 px-5 pt-6">
       {categories.map((category, index) => {
-        const Icon = icons[index % icons.length];
+        let Icon;
+
+        const categoryName = category.name.trim().toLowerCase();
+
+        // Custom category icons
+        if (categoryName === "audio") {
+          Icon = Headphones;
+        } else if (categoryName === "cases") {
+          Icon = Smartphone;
+        } else {
+          Icon = icons[index % icons.length];
+        }
 
         return (
           <motion.div

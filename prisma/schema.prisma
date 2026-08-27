@@ -7,6 +7,10 @@ datasource db {
   provider = "postgresql"
 }
 
+// =========================================================
+// BUSINESS
+// =========================================================
+
 model Business {
   id        String   @id @default(cuid())
   name      String
@@ -14,10 +18,38 @@ model Business {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  categories   Category[]
-  products     Product[]
+  admins        Admin[]
+  categories    Category[]
+  products      Product[]
   notifications Notification[]
+  purchases     Purchase[]
+  sales         Sale[]
+  expenses      Expense[]
 }
+
+// =========================================================
+// ADMIN
+// =========================================================
+
+model Admin {
+  id           String @id @default(cuid())
+  name         String
+  email        String @unique
+  passwordHash String
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+}
+
+// =========================================================
+// CATEGORY
+// =========================================================
 
 model Category {
   id        String   @id @default(cuid())
@@ -30,16 +62,21 @@ model Category {
 
   products Product[]
 
+  @@unique([businessId, name])
   @@index([businessId])
 }
+
+// =========================================================
+// PRODUCT
+// =========================================================
 
 model Product {
   id          String  @id @default(cuid())
   name        String
   description String?
-  
-  price       Decimal @db.Decimal(10, 2)
-  costPrice   Decimal @db.Decimal(10, 2)
+
+  price     Decimal @db.Decimal(10, 2)
+  costPrice Decimal @db.Decimal(10, 2)
 
   stock       Int     @default(0)
   imageUrl    String?
@@ -54,21 +91,30 @@ model Product {
   categoryId String
   category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
+  purchaseItems PurchaseItem[]
+  saleItems     SaleItem[]
+
   @@index([businessId])
   @@index([categoryId])
 }
 
+// =========================================================
+// NOTIFICATIONS / DISCOUNTS
+// =========================================================
 
 model Notification {
-  id        String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  title     String
-  message   String
-  type      String   @default("INFO")
+  title   String
+  message String
 
-  discount  Decimal? @db.Decimal(5, 2)
+  // INFO / DISCOUNT / PROMOTION / ALERT
+  type String @default("INFO")
 
-  isActive  Boolean  @default(true)
+  // Example: 20 = 20% discount
+  discount Decimal? @db.Decimal(5, 2)
+
+  isActive Boolean @default(true)
 
   startDate DateTime?
   endDate   DateTime?
@@ -81,4 +127,124 @@ model Notification {
 
   @@index([businessId])
   @@index([isActive])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+// =========================================================
+// PURCHASE
+// =========================================================
+
+model Purchase {
+  id String @id @default(cuid())
+
+  supplier String?
+
+  totalCost Decimal @db.Decimal(12, 2)
+
+  purchasedAt DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  items PurchaseItem[]
+
+  @@index([businessId])
+  @@index([purchasedAt])
+}
+
+// =========================================================
+// PURCHASE ITEM
+// =========================================================
+
+model PurchaseItem {
+  id String @id @default(cuid())
+
+  quantity Int
+
+  unitCost  Decimal @db.Decimal(10, 2)
+  totalCost Decimal @db.Decimal(12, 2)
+
+  purchaseId String
+  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([purchaseId])
+  @@index([productId])
+}
+
+// =========================================================
+// SALE
+// =========================================================
+
+model Sale {
+  id String @id @default(cuid())
+
+  totalAmount Decimal @db.Decimal(12, 2)
+  totalCost   Decimal @db.Decimal(12, 2)
+  profit      Decimal @db.Decimal(12, 2)
+
+  soldAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  items SaleItem[]
+
+  @@index([businessId])
+  @@index([soldAt])
+}
+
+// =========================================================
+// SALE ITEM
+// =========================================================
+
+model SaleItem {
+  id String @id @default(cuid())
+
+  quantity Int
+
+  sellingPrice Decimal @db.Decimal(10, 2)
+  costPrice    Decimal @db.Decimal(10, 2)
+
+  totalAmount Decimal @db.Decimal(12, 2)
+  totalCost   Decimal @db.Decimal(12, 2)
+  profit      Decimal @db.Decimal(12, 2)
+
+  saleId String
+  sale   Sale   @relation(fields: [saleId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([saleId])
+  @@index([productId])
+}
+
+// =========================================================
+// EXPENSE
+// =========================================================
+
+model Expense {
+  id String @id @default(cuid())
+
+  title       String
+  description String?
+
+  amount Decimal @db.Decimal(12, 2)
+
+  expenseDate DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([expenseDate])
 }
