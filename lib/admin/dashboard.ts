@@ -12,19 +12,10 @@ function startOfDay(date = new Date()) {
   return result;
 }
 
-function endOfDay(date = new Date()) {
-  const result = new Date(date);
-
-  result.setHours(23, 59, 59, 999);
-
-  return result;
-}
-
 function startOfWeek(date = new Date()) {
   const result = startOfDay(date);
 
   const day = result.getDay();
-
   const difference = day === 0 ? 6 : day - 1;
 
   result.setDate(result.getDate() - difference);
@@ -49,15 +40,15 @@ function startOfYear(date = new Date()) {
 }
 
 // =========================================================
-// NEXT DAY
+// YESTERDAY
 // =========================================================
 
-function getTomorrow() {
-  const tomorrow = startOfDay();
+function getYesterday() {
+  const yesterday = startOfDay();
 
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  yesterday.setDate(yesterday.getDate() - 1);
 
-  return tomorrow;
+  return yesterday;
 }
 
 // =========================================================
@@ -69,7 +60,7 @@ function numberValue(value: unknown) {
 }
 
 // =========================================================
-// GET SALES SUMMARY
+// SALES SUMMARY
 // =========================================================
 
 async function getSalesSummary(
@@ -99,24 +90,18 @@ async function getSalesSummary(
   });
 
   return {
-    revenue: numberValue(
-      result._sum.totalAmount
-    ),
+    revenue: numberValue(result._sum.totalAmount),
 
-    cost: numberValue(
-      result._sum.totalCost
-    ),
+    cost: numberValue(result._sum.totalCost),
 
-    profit: numberValue(
-      result._sum.profit
-    ),
+    profit: numberValue(result._sum.profit),
 
     salesCount: result._count.id,
   };
 }
 
 // =========================================================
-// GET EXPENSE SUMMARY
+// EXPENSE SUMMARY
 // =========================================================
 
 async function getExpenseSummary(
@@ -143,7 +128,7 @@ async function getExpenseSummary(
 }
 
 // =========================================================
-// BUILD FINANCIAL SUMMARY
+// BUILD SUMMARY
 // =========================================================
 
 function buildSummary(
@@ -232,11 +217,7 @@ async function getDailyChart(
 
   const chart = [];
 
-  for (
-    let i = 0;
-    i < days;
-    i++
-  ) {
+  for (let i = 0; i < days; i++) {
     const date = new Date(from);
 
     date.setDate(
@@ -314,11 +295,8 @@ async function getDailyChart(
       date: date.toISOString(),
 
       revenue,
-
       cost,
-
       profit,
-
       expenses: expensesAmount,
 
       netProfit:
@@ -467,11 +445,8 @@ async function getMonthlyChart(
       date: date.toISOString(),
 
       revenue,
-
       cost,
-
       profit,
-
       expenses: expensesAmount,
 
       netProfit:
@@ -547,17 +522,11 @@ async function getYearlyChart(
     const year =
       currentYear - 4 + i;
 
-    const yearStart = new Date(
-      year,
-      0,
-      1
-    );
+    const yearStart =
+      new Date(year, 0, 1);
 
-    const yearEnd = new Date(
-      year + 1,
-      0,
-      1
-    );
+    const yearEnd =
+      new Date(year + 1, 0, 1);
 
     const yearSales =
       sales.filter(
@@ -621,11 +590,8 @@ async function getYearlyChart(
       date: yearStart.toISOString(),
 
       revenue,
-
       cost,
-
       profit,
-
       expenses: expensesAmount,
 
       netProfit:
@@ -637,7 +603,7 @@ async function getYearlyChart(
 }
 
 // =========================================================
-// MAIN DASHBOARD FUNCTION
+// MAIN DASHBOARD
 // =========================================================
 
 export async function getDashboardData(
@@ -645,15 +611,25 @@ export async function getDashboardData(
 ) {
   const today = startOfDay();
 
-  const tomorrow =
-    getTomorrow();
+  const tomorrow = new Date(today);
 
-  const dayAfterTomorrow =
-    new Date(tomorrow);
-
-  dayAfterTomorrow.setDate(
-    dayAfterTomorrow.getDate() + 1
+  tomorrow.setDate(
+    tomorrow.getDate() + 1
   );
+
+  // =======================================================
+  // YESTERDAY
+  // =======================================================
+
+  const yesterday =
+    getYesterday();
+
+  const yesterdayEnd =
+    new Date(today);
+
+  // =======================================================
+  // WEEK
+  // =======================================================
 
   const weekStart =
     startOfWeek();
@@ -665,6 +641,10 @@ export async function getDashboardData(
     nextWeek.getDate() + 7
   );
 
+  // =======================================================
+  // MONTH
+  // =======================================================
+
   const monthStart =
     startOfMonth();
 
@@ -674,6 +654,10 @@ export async function getDashboardData(
       monthStart.getMonth() + 1,
       1
     );
+
+  // =======================================================
+  // YEAR
+  // =======================================================
 
   const yearStart =
     startOfYear();
@@ -686,31 +670,35 @@ export async function getDashboardData(
     );
 
   // =======================================================
-  // FINANCIAL DATA
+  // FETCH EVERYTHING
   // =======================================================
 
   const [
     todaySales,
-    tomorrowSales,
+    yesterdaySales,
     weekSales,
     monthSales,
     yearSales,
 
     todayExpenses,
-    tomorrowExpenses,
+    yesterdayExpenses,
     weekExpenses,
     monthExpenses,
     yearExpenses,
 
     productCount,
+
     lowStockProducts,
-    recentProducts,
+
+    inventoryProducts,
+
     recentSales,
 
     weeklyChart,
     monthlyChart,
     yearlyChart,
   ] = await Promise.all([
+
     // TODAY
     getSalesSummary(
       businessId,
@@ -718,11 +706,11 @@ export async function getDashboardData(
       tomorrow
     ),
 
-    // TOMORROW
+    // YESTERDAY
     getSalesSummary(
       businessId,
-      tomorrow,
-      dayAfterTomorrow
+      yesterday,
+      yesterdayEnd
     ),
 
     // WEEK
@@ -753,11 +741,11 @@ export async function getDashboardData(
       tomorrow
     ),
 
-    // TOMORROW EXPENSES
+    // YESTERDAY EXPENSES
     getExpenseSummary(
       businessId,
-      tomorrow,
-      dayAfterTomorrow
+      yesterday,
+      yesterdayEnd
     ),
 
     // WEEK EXPENSES
@@ -781,7 +769,7 @@ export async function getDashboardData(
       nextYear
     ),
 
-    // PRODUCTS
+    // PRODUCT COUNT
     prisma.product.count({
       where: {
         businessId,
@@ -809,7 +797,7 @@ export async function getDashboardData(
       take: 5,
     }),
 
-    // RECENT PRODUCTS
+    // INVENTORY PRODUCTS
     prisma.product.findMany({
       where: {
         businessId,
@@ -820,10 +808,10 @@ export async function getDashboardData(
       },
 
       orderBy: {
-        createdAt: "desc",
+        updatedAt: "desc",
       },
 
-      take: 5,
+      take: 8,
     }),
 
     // RECENT SALES
@@ -844,29 +832,29 @@ export async function getDashboardData(
         soldAt: "desc",
       },
 
-      take: 5,
+      take: 8,
     }),
 
-    // WEEK GRAPH
+    // WEEK CHART
     getDailyChart(
       businessId,
       7
     ),
 
-    // MONTH GRAPH
+    // MONTH CHART
     getMonthlyChart(
       businessId
     ),
 
-    // YEAR GRAPH
+    // YEAR CHART
     getYearlyChart(
       businessId
     ),
   ]);
 
-  // =========================================================
-  // BUILD PERIOD SUMMARIES
-  // =========================================================
+  // =======================================================
+  // SUMMARIES
+  // =======================================================
 
   const todaySummary =
     buildSummary(
@@ -874,10 +862,10 @@ export async function getDashboardData(
       todayExpenses
     );
 
-  const tomorrowSummary =
+  const yesterdaySummary =
     buildSummary(
-      tomorrowSales,
-      tomorrowExpenses
+      yesterdaySales,
+      yesterdayExpenses
     );
 
   const weekSummary =
@@ -898,9 +886,9 @@ export async function getDashboardData(
       yearExpenses
     );
 
-  // =========================================================
+  // =======================================================
   // RETURN
-  // =========================================================
+  // =======================================================
 
   return {
     stats: {
@@ -926,24 +914,27 @@ export async function getDashboardData(
       todayProfitMargin:
         todaySummary.profitMargin,
 
-      // TOMORROW
-      tomorrowRevenue:
-        tomorrowSummary.revenue,
+      // YESTERDAY
+      yesterdayRevenue:
+        yesterdaySummary.revenue,
 
-      tomorrowCost:
-        tomorrowSummary.cost,
+      yesterdayCost:
+        yesterdaySummary.cost,
 
-      tomorrowProfit:
-        tomorrowSummary.profit,
+      yesterdayProfit:
+        yesterdaySummary.profit,
 
-      tomorrowExpenses:
-        tomorrowSummary.expenses,
+      yesterdayExpenses:
+        yesterdaySummary.expenses,
 
-      tomorrowNetProfit:
-        tomorrowSummary.netProfit,
+      yesterdayNetProfit:
+        yesterdaySummary.netProfit,
 
-      tomorrowSalesCount:
-        tomorrowSummary.salesCount,
+      yesterdaySalesCount:
+        yesterdaySummary.salesCount,
+
+      yesterdayProfitMargin:
+        yesterdaySummary.profitMargin,
 
       // WEEK
       weekRevenue:
@@ -1020,7 +1011,7 @@ export async function getDashboardData(
 
     lowStockProducts,
 
-    recentProducts,
+    inventoryProducts,
 
     recentSales,
 

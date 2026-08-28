@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -27,29 +28,63 @@ type ExpensesClientProps = {
   initialExpenses: Expense[];
 };
 
-function formatCurrency(
-  value: number
-) {
-  return new Intl.NumberFormat(
-    "en-US",
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }
-  ).format(value);
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
 }
 
-function formatDate(
-  value: string
-) {
-  return new Intl.DateTimeFormat(
-    "en-US",
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }
-  ).format(new Date(value));
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(value));
+}
+
+function startOfDay(date = new Date()) {
+  const result = new Date(date);
+
+  result.setHours(0, 0, 0, 0);
+
+  return result;
+}
+
+function startOfWeek(date = new Date()) {
+  const result = startOfDay(date);
+
+  const day = result.getDay();
+
+  const difference = day === 0 ? 6 : day - 1;
+
+  result.setDate(result.getDate() - difference);
+
+  return result;
+}
+
+function startOfMonth(date = new Date()) {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    1
+  );
+}
+
+function startOfYear(date = new Date()) {
+  return new Date(
+    date.getFullYear(),
+    0,
+    1
+  );
+}
+
+function isSameDay(dateA: Date, dateB: Date) {
+  return (
+    dateA.getFullYear() === dateB.getFullYear() &&
+    dateA.getMonth() === dateB.getMonth() &&
+    dateA.getDate() === dateB.getDate()
+  );
 }
 
 export default function ExpensesClient({
@@ -57,37 +92,54 @@ export default function ExpensesClient({
   initialExpenses,
 }: ExpensesClientProps) {
   const [expenses, setExpenses] =
-    useState<Expense[]>(
-      initialExpenses
-    );
+    useState<Expense[]>(initialExpenses);
 
-  const [title, setTitle] =
-    useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
 
-  const [description, setDescription] =
-    useState("");
-
-  const [amount, setAmount] =
-    useState("");
-
-  const [expenseDate, setExpenseDate] =
-    useState(
-      new Date()
-        .toISOString()
-        .split("T")[0]
-    );
+  const [expenseDate, setExpenseDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
 
   const [isSubmitting, setIsSubmitting] =
     useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [showForm, setShowForm] = useState(false);
 
-  const [message, setMessage] =
-    useState("");
+  // =========================================================
+  // DATE REFERENCES
+  // =========================================================
 
-  const [showForm, setShowForm] =
-    useState(false);
+  const today = useMemo(
+    () => startOfDay(),
+    [expenses]
+  );
+
+  const yesterday = useMemo(() => {
+    const date = startOfDay();
+
+    date.setDate(date.getDate() - 1);
+
+    return date;
+  }, [expenses]);
+
+  const weekStart = useMemo(
+    () => startOfWeek(),
+    [expenses]
+  );
+
+  const monthStart = useMemo(
+    () => startOfMonth(),
+    [expenses]
+  );
+
+  const yearStart = useMemo(
+    () => startOfYear(),
+    [expenses]
+  );
 
   // =========================================================
   // TOTAL EXPENSES
@@ -95,42 +147,135 @@ export default function ExpensesClient({
 
   const totalExpenses = useMemo(() => {
     return expenses.reduce(
-      (sum, expense) =>
-        sum + expense.amount,
+      (sum, expense) => sum + expense.amount,
       0
     );
   }, [expenses]);
 
   // =========================================================
+  // TODAY
+  // =========================================================
+
+  const todayData = useMemo(() => {
+    const filtered = expenses.filter((expense) =>
+      isSameDay(
+        new Date(expense.expenseDate),
+        today
+      )
+    );
+
+    return {
+      amount: filtered.reduce(
+        (sum, expense) => sum + expense.amount,
+        0
+      ),
+      count: filtered.length,
+    };
+  }, [expenses, today]);
+
+  // =========================================================
+  // YESTERDAY
+  // =========================================================
+
+  const yesterdayData = useMemo(() => {
+    const filtered = expenses.filter((expense) =>
+      isSameDay(
+        new Date(expense.expenseDate),
+        yesterday
+      )
+    );
+
+    return {
+      amount: filtered.reduce(
+        (sum, expense) => sum + expense.amount,
+        0
+      ),
+      count: filtered.length,
+    };
+  }, [expenses, yesterday]);
+
+  // =========================================================
+  // THIS WEEK
+  // =========================================================
+
+  const weekData = useMemo(() => {
+    const filtered = expenses.filter(
+      (expense) =>
+        new Date(expense.expenseDate) >= weekStart
+    );
+
+    return {
+      amount: filtered.reduce(
+        (sum, expense) => sum + expense.amount,
+        0
+      ),
+      count: filtered.length,
+    };
+  }, [expenses, weekStart]);
+
+  // =========================================================
   // THIS MONTH
   // =========================================================
 
-  const monthlyExpenses =
-    useMemo(() => {
-      const now = new Date();
+  const monthData = useMemo(() => {
+    const filtered = expenses.filter(
+      (expense) =>
+        new Date(expense.expenseDate) >= monthStart
+    );
 
-      return expenses.reduce(
-        (sum, expense) => {
-          const date = new Date(
-            expense.expenseDate
-          );
-
-          if (
-            date.getMonth() ===
-              now.getMonth() &&
-            date.getFullYear() ===
-              now.getFullYear()
-          ) {
-            return (
-              sum + expense.amount
-            );
-          }
-
-          return sum;
-        },
+    return {
+      amount: filtered.reduce(
+        (sum, expense) => sum + expense.amount,
         0
-      );
-    }, [expenses]);
+      ),
+      count: filtered.length,
+    };
+  }, [expenses, monthStart]);
+
+  // =========================================================
+  // THIS YEAR
+  // =========================================================
+
+  const yearData = useMemo(() => {
+    const filtered = expenses.filter(
+      (expense) =>
+        new Date(expense.expenseDate) >= yearStart
+    );
+
+    return {
+      amount: filtered.reduce(
+        (sum, expense) => sum + expense.amount,
+        0
+      ),
+      count: filtered.length,
+    };
+  }, [expenses, yearStart]);
+
+  // =========================================================
+  // AVERAGE EXPENSE
+  // =========================================================
+
+  const averageExpense = useMemo(() => {
+    if (expenses.length === 0) {
+      return 0;
+    }
+
+    return totalExpenses / expenses.length;
+  }, [expenses.length, totalExpenses]);
+
+  // =========================================================
+  // LARGEST EXPENSE
+  // =========================================================
+
+  const largestExpense = useMemo(() => {
+    if (expenses.length === 0) {
+      return null;
+    }
+
+    return [...expenses].sort(
+      (a, b) => b.amount - a.amount
+    )[0];
+  }, [expenses]);
 
   // =========================================================
   // CREATE EXPENSE
@@ -141,19 +286,14 @@ export default function ExpensesClient({
     setMessage("");
 
     if (!title.trim()) {
-      setError(
-        "Expense title is required."
-      );
+      setError("Expense title is required.");
       return;
     }
 
-    const numericAmount =
-      Number(amount);
+    const numericAmount = Number(amount);
 
     if (
-      !Number.isFinite(
-        numericAmount
-      ) ||
+      !Number.isFinite(numericAmount) ||
       numericAmount <= 0
     ) {
       setError(
@@ -163,46 +303,34 @@ export default function ExpensesClient({
     }
 
     if (!expenseDate) {
-      setError(
-        "Expense date is required."
-      );
+      setError("Expense date is required.");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const response =
-        await fetch(
-          "/api/expenses",
-          {
-            method: "POST",
+      const response = await fetch(
+        "/api/expenses",
+        {
+          method: "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-            body: JSON.stringify({
-              businessId,
+          body: JSON.stringify({
+            businessId,
+            title: title.trim(),
+            description:
+              description.trim() || null,
+            amount: numericAmount,
+            expenseDate,
+          }),
+        }
+      );
 
-              title:
-                title.trim(),
-
-              description:
-                description.trim() ||
-                null,
-
-              amount:
-                numericAmount,
-
-              expenseDate,
-            }),
-          }
-        );
-
-      const data =
-        await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -212,36 +340,25 @@ export default function ExpensesClient({
       }
 
       const newExpense: Expense = {
-        id:
-          data.expense.id,
-
-        title:
-          data.expense.title,
-
+        id: data.expense.id,
+        title: data.expense.title,
         description:
           data.expense.description,
-
-        amount:
-          Number(
-            data.expense.amount
-          ),
-
+        amount: Number(
+          data.expense.amount
+        ),
         expenseDate:
           data.expense.expenseDate,
-
         createdAt:
           data.expense.createdAt,
-
         updatedAt:
           data.expense.createdAt,
       };
 
-      setExpenses(
-        (current) => [
-          newExpense,
-          ...current,
-        ]
-      );
+      setExpenses((current) => [
+        newExpense,
+        ...current,
+      ]);
 
       setTitle("");
       setDescription("");
@@ -289,16 +406,14 @@ export default function ExpensesClient({
     setMessage("");
 
     try {
-      const response =
-        await fetch(
-          `/api/expenses/${expenseId}?businessId=${businessId}`,
-          {
-            method: "DELETE",
-          }
-        );
+      const response = await fetch(
+        `/api/expenses/${expenseId}?businessId=${businessId}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-      const data =
-        await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
         throw new Error(
@@ -307,13 +422,11 @@ export default function ExpensesClient({
         );
       }
 
-      setExpenses(
-        (current) =>
-          current.filter(
-            (expense) =>
-              expense.id !==
-              expenseId
-          )
+      setExpenses((current) =>
+        current.filter(
+          (expense) =>
+            expense.id !== expenseId
+        )
       );
 
       setMessage(
@@ -328,6 +441,38 @@ export default function ExpensesClient({
     }
   }
 
+  // =========================================================
+  // PERIOD DATA
+  // =========================================================
+
+  const periodData = [
+    {
+      label: "Today",
+      amount: todayData.amount,
+      count: todayData.count,
+    },
+    {
+      label: "Yesterday",
+      amount: yesterdayData.amount,
+      count: yesterdayData.count,
+    },
+    {
+      label: "This Week",
+      amount: weekData.amount,
+      count: weekData.count,
+    },
+    {
+      label: "This Month",
+      amount: monthData.amount,
+      count: monthData.count,
+    },
+    {
+      label: "This Year",
+      amount: yearData.amount,
+      count: yearData.count,
+    },
+  ];
+
   return (
     <div className="min-h-screen px-4 pb-28 pt-5 sm:px-6 lg:px-10 lg:pb-10 lg:pt-8">
       <div className="mx-auto max-w-[1500px]">
@@ -337,7 +482,6 @@ export default function ExpensesClient({
         =================================================== */}
 
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-
           <div>
             <p className="text-[9px] font-bold uppercase tracking-[0.22em] text-black/30">
               Financial management
@@ -348,8 +492,8 @@ export default function ExpensesClient({
             </h1>
 
             <p className="mt-1 text-sm text-black/40">
-              Track your business expenses and
-              operating costs.
+              Track and understand where your
+              business money goes.
             </p>
           </div>
 
@@ -357,8 +501,7 @@ export default function ExpensesClient({
             type="button"
             onClick={() => {
               setShowForm(
-                (current) =>
-                  !current
+                (current) => !current
               );
 
               setError("");
@@ -367,7 +510,6 @@ export default function ExpensesClient({
             className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#222022] px-5 text-sm font-bold text-white transition hover:bg-black"
           >
             <Plus size={17} />
-
             Add Expense
           </button>
         </div>
@@ -399,60 +541,186 @@ export default function ExpensesClient({
         )}
 
         {/* ===================================================
-            SUMMARY CARDS
+            MAIN SUMMARY CARDS
         =================================================== */}
 
-        <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="mb-5 grid grid-cols-2 gap-3 sm:gap-4">
 
-          <div className="rounded-[24px] border border-black/[0.05] bg-white p-5">
-            <div className="flex items-center justify-between">
+          {/* TOTAL */}
 
+          <div className="rounded-[24px] border border-black/[0.05] bg-white p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-black/30">
+                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-black/30 sm:text-[9px] sm:tracking-[0.18em]">
                   Total expenses
                 </p>
 
-                <p className="mt-2 text-2xl font-black">
+                <p className="mt-2 text-lg font-black sm:text-2xl">
                   {formatCurrency(
                     totalExpenses
                   )}
                 </p>
+
+                <p className="mt-1 text-[9px] text-black/30 sm:text-xs">
+                  {expenses.length}{" "}
+                  transactions
+                </p>
               </div>
 
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#C3D809]/20">
+              <div className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-[#C3D809]/20 sm:flex">
                 <CircleDollarSign
                   size={20}
                 />
               </div>
-
             </div>
           </div>
 
-          <div className="rounded-[24px] border border-black/[0.05] bg-white p-5">
-            <div className="flex items-center justify-between">
+          {/* AVERAGE */}
 
+          <div className="rounded-[24px] border border-black/[0.05] bg-white p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-black/30">
-                  This month
+                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-black/30 sm:text-[9px] sm:tracking-[0.18em]">
+                  Average expense
                 </p>
 
-                <p className="mt-2 text-2xl font-black">
+                <p className="mt-2 text-lg font-black sm:text-2xl">
                   {formatCurrency(
-                    monthlyExpenses
+                    averageExpense
                   )}
+                </p>
+
+                <p className="mt-1 text-[9px] text-black/30 sm:text-xs">
+                  Per transaction
                 </p>
               </div>
 
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-black/[0.05]">
+              <div className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-black/[0.05] sm:flex">
+                <Receipt size={20} />
+              </div>
+            </div>
+          </div>
+
+          {/* THIS MONTH */}
+
+          <div className="rounded-[24px] border border-black/[0.05] bg-white p-4 sm:p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-black/30 sm:text-[9px] sm:tracking-[0.18em]">
+                  This month
+                </p>
+
+                <p className="mt-2 text-lg font-black sm:text-2xl">
+                  {formatCurrency(
+                    monthData.amount
+                  )}
+                </p>
+
+                <p className="mt-1 text-[9px] text-black/30 sm:text-xs">
+                  {monthData.count}{" "}
+                  transactions
+                </p>
+              </div>
+
+              <div className="hidden h-11 w-11 items-center justify-center rounded-2xl bg-black/[0.05] sm:flex">
                 <CalendarDays
                   size={20}
                 />
               </div>
+            </div>
+          </div>
 
+          {/* LARGEST */}
+
+          <div className="rounded-[24px] bg-[#C3D809] p-4 sm:p-5">
+            <div>
+              <p className="text-[8px] font-bold uppercase tracking-[0.16em] text-black/45 sm:text-[9px] sm:tracking-[0.18em]">
+                Largest expense
+              </p>
+
+              {largestExpense ? (
+                <>
+                  <p className="mt-2 truncate text-lg font-black text-[#222022] sm:text-2xl">
+                    {formatCurrency(
+                      largestExpense.amount
+                    )}
+                  </p>
+
+                  <p className="mt-1 truncate text-[9px] font-semibold text-black/45 sm:text-xs">
+                    {largestExpense.title}
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-2 text-lg font-black text-[#222022] sm:text-2xl">
+                    0.00
+                  </p>
+
+                  <p className="mt-1 text-[9px] text-black/45 sm:text-xs">
+                    No expenses yet
+                  </p>
+                </>
+              )}
             </div>
           </div>
 
         </div>
+
+        {/* ===================================================
+            EXPENSE PERIOD OVERVIEW
+        =================================================== */}
+
+        <section className="mb-5 rounded-[24px] border border-black/[0.05] bg-white p-5 sm:p-6">
+
+          <div className="mb-4">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-black/30">
+              Expense overview
+            </p>
+
+            <h2 className="mt-1 text-lg font-black">
+              Spending by period
+            </h2>
+          </div>
+
+          {/* Horizontal row on every screen */}
+
+          <div className="overflow-x-auto pb-1">
+            <div className="flex min-w-[650px] divide-x divide-black/[0.06]">
+
+              {periodData.map(
+                (period, index) => (
+                  <div
+                    key={period.label}
+                    className={`flex-1 px-4 first:pl-0 last:pr-0 ${
+                      index === 0
+                        ? "pl-0"
+                        : ""
+                    }`}
+                  >
+                    <p className="text-[10px] font-bold text-black/35">
+                      {period.label}
+                    </p>
+
+                    <p className="mt-2 text-base font-black sm:text-lg">
+                      {formatCurrency(
+                        period.amount
+                      )}
+                    </p>
+
+                    <p className="mt-1 text-[9px] text-black/30">
+                      {period.count}{" "}
+                      {period.count === 1
+                        ? "expense"
+                        : "expenses"}
+                    </p>
+                  </div>
+                )
+              )}
+
+            </div>
+          </div>
+
+        </section>
 
         {/* ===================================================
             ADD EXPENSE FORM
@@ -518,9 +786,7 @@ export default function ExpensesClient({
 
                 <input
                   type="date"
-                  value={
-                    expenseDate
-                  }
+                  value={expenseDate}
                   onChange={(event) =>
                     setExpenseDate(
                       event.target.value
@@ -537,9 +803,7 @@ export default function ExpensesClient({
 
                 <input
                   type="text"
-                  value={
-                    description
-                  }
+                  value={description}
                   onChange={(event) =>
                     setDescription(
                       event.target.value
@@ -566,12 +830,8 @@ export default function ExpensesClient({
 
               <button
                 type="button"
-                disabled={
-                  isSubmitting
-                }
-                onClick={
-                  createExpense
-                }
+                disabled={isSubmitting}
+                onClick={createExpense}
                 className="flex h-11 items-center justify-center gap-2 rounded-2xl bg-[#222022] px-5 text-sm font-bold text-white transition hover:bg-black disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {isSubmitting ? (
@@ -642,9 +902,7 @@ export default function ExpensesClient({
               {expenses.map(
                 (expense) => (
                   <div
-                    key={
-                      expense.id
-                    }
+                    key={expense.id}
                     className="flex flex-col gap-4 rounded-2xl bg-[#F8F8F6] p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
 

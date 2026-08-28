@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   ArrowLeft,
-  Bell,
+  
   ChevronRight,
   Tag,
   Sparkles,
@@ -73,75 +73,7 @@ export default async function NotificationsPage() {
           </div>
         </header>
 
-        {/* Notifications */}
-        <section className="px-5 py-6">
-          {notifications.length === 0 ? (
-            <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#C3D809]/15">
-                <Bell size={28} strokeWidth={1.6} />
-              </div>
-
-              <h2 className="mt-5 text-lg font-bold">
-                No notifications
-              </h2>
-
-              <p className="mt-2 max-w-xs text-sm leading-6 text-black/45">
-                You&apos;ll see discounts, new arrivals and important
-                updates here.
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className="rounded-2xl border border-black/5 bg-white p-4 shadow-[0_4px_20px_rgba(0,0,0,0.04)]"
-                >
-                  <div className="flex gap-4">
-                    {/* Icon */}
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#C3D809]/15">
-                      {notification.type === "DISCOUNT" ? (
-                        <Tag size={20} strokeWidth={1.8} />
-                      ) : (
-                        <Sparkles size={20} strokeWidth={1.8} />
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-start justify-between gap-3">
-                        <h2 className="font-bold">
-                          {notification.title}
-                        </h2>
-
-                        <ChevronRight
-                          size={17}
-                          className="mt-0.5 shrink-0 text-black/30"
-                        />
-                      </div>
-
-                      <p className="mt-1 text-sm leading-5 text-black/55">
-                        {notification.message}
-                      </p>
-
-                      {notification.discount !== null && (
-                        <p className="mt-2 text-sm font-bold">
-                          {Number(notification.discount)}% OFF
-                        </p>
-                      )}
-
-                      <p className="mt-3 text-[11px] font-medium uppercase tracking-wider text-black/35">
-                        {new Date(
-                          notification.createdAt
-                        ).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
+       
       </div>
     </main>
   );

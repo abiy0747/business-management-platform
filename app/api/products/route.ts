@@ -2,76 +2,11 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // =========================================================
-// GET PRODUCTS
-// =========================================================
-
-export async function GET() {
-  try {
-    const products =
-      await prisma.product.findMany({
-        include: {
-          category: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      });
-
-    const safeProducts =
-      products.map((product) => ({
-        id: product.id,
-        name: product.name,
-        description:
-          product.description,
-        price: Number(product.price),
-        costPrice: Number(
-          product.costPrice
-        ),
-        stock: product.stock,
-        imageUrl:
-          product.imageUrl,
-        isAvailable:
-          product.isAvailable,
-        businessId:
-          product.businessId,
-        categoryId:
-          product.categoryId,
-        category:
-          product.category.name,
-        createdAt:
-          product.createdAt,
-        updatedAt:
-          product.updatedAt,
-      }));
-
-    return NextResponse.json(
-      safeProducts
-    );
-  } catch (error) {
-    console.error(
-      "GET PRODUCTS ERROR:",
-      error
-    );
-
-    return NextResponse.json(
-      {
-        error:
-          "Failed to fetch products.",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
-}
-
-// =========================================================
 // CREATE PRODUCT
+// POST /api/products
 // =========================================================
 
-export async function POST(
-  request: Request
-) {
+export async function POST(request: Request) {
   try {
     const body = await request.json();
 
@@ -81,6 +16,7 @@ export async function POST(
       description,
       price,
       costPrice,
+      stock,
       imageUrl,
       categoryId,
       isAvailable,
@@ -91,14 +27,12 @@ export async function POST(
     // -----------------------------------------------------
 
     if (
-      typeof businessId !==
-        "string" ||
+      typeof businessId !== "string" ||
       !businessId.trim()
     ) {
       return NextResponse.json(
         {
-          error:
-            "Business ID is required.",
+          error: "Business ID is required.",
         },
         { status: 400 }
       );
@@ -110,52 +44,43 @@ export async function POST(
     ) {
       return NextResponse.json(
         {
-          error:
-            "Product name is required.",
+          error: "Product name is required.",
         },
         { status: 400 }
       );
     }
 
     if (
-      typeof categoryId !==
-        "string" ||
+      typeof categoryId !== "string" ||
       !categoryId.trim()
     ) {
       return NextResponse.json(
         {
-          error:
-            "Category is required.",
+          error: "Category is required.",
         },
         { status: 400 }
       );
     }
 
-    const numericPrice =
-      Number(price);
-
-    const numericCostPrice =
-      Number(costPrice);
+    const numericPrice = Number(price);
+    const numericCostPrice = Number(costPrice);
+    const numericStock = Number(stock);
 
     if (
-      !Number.isFinite(
-        numericPrice
-      ) ||
+      !Number.isFinite(numericPrice) ||
       numericPrice < 0
     ) {
       return NextResponse.json(
         {
           error:
-            "Default selling price must be a valid non-negative number.",
+            "Selling price must be a valid non-negative number.",
         },
         { status: 400 }
       );
     }
 
     if (
-      !Number.isFinite(
-        numericCostPrice
-      ) ||
+      !Number.isFinite(numericCostPrice) ||
       numericCostPrice < 0
     ) {
       return NextResponse.json(
@@ -167,42 +92,48 @@ export async function POST(
       );
     }
 
+    if (
+      !Number.isInteger(numericStock) ||
+      numericStock < 0
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Stock must be a whole number greater than or equal to 0.",
+        },
+        { status: 400 }
+      );
+    }
+
     // -----------------------------------------------------
     // VERIFY BUSINESS
     // -----------------------------------------------------
 
-    const business =
-      await prisma.business.findUnique(
-        {
-          where: {
-            id: businessId,
-          },
-        }
-      );
+    const business = await prisma.business.findUnique({
+      where: {
+        id: businessId,
+      },
+    });
 
     if (!business) {
       return NextResponse.json(
         {
-          error:
-            "Business not found.",
+          error: "Business not found.",
         },
         { status: 404 }
       );
     }
 
     // -----------------------------------------------------
-    // VERIFY CATEGORY BELONGS TO BUSINESS
+    // VERIFY CATEGORY
     // -----------------------------------------------------
 
-    const category =
-      await prisma.category.findFirst(
-        {
-          where: {
-            id: categoryId,
-            businessId,
-          },
-        }
-      );
+    const category = await prisma.category.findFirst({
+      where: {
+        id: categoryId,
+        businessId,
+      },
+    });
 
     if (!category) {
       return NextResponse.json(
@@ -218,50 +149,46 @@ export async function POST(
     // CREATE PRODUCT
     // -----------------------------------------------------
 
-    const product =
-      await prisma.product.create({
-        data: {
-          name: name.trim(),
+    const product = await prisma.product.create({
+      data: {
+        name: name.trim(),
 
-          description:
-            typeof description ===
-              "string" &&
-            description.trim()
-              ? description.trim()
-              : null,
+        description:
+          typeof description === "string" &&
+          description.trim()
+            ? description.trim()
+            : null,
 
-          price: numericPrice,
+        price: numericPrice,
 
-          costPrice:
-            numericCostPrice,
+        costPrice: numericCostPrice,
 
-          // IMPORTANT:
-          // New products start with zero stock.
-          // Stock is added through purchases.
-          stock: 0,
+        stock: numericStock,
 
-          imageUrl:
-            typeof imageUrl ===
-              "string" &&
-            imageUrl.trim()
-              ? imageUrl.trim()
-              : null,
+        imageUrl:
+          typeof imageUrl === "string" &&
+          imageUrl.trim()
+            ? imageUrl.trim()
+            : null,
 
-          isAvailable:
-            typeof isAvailable ===
-            "boolean"
-              ? isAvailable
-              : true,
+        isAvailable:
+          typeof isAvailable === "boolean"
+            ? isAvailable
+            : true,
 
-          businessId,
+        businessId,
 
-          categoryId,
-        },
+        categoryId,
+      },
 
-        include: {
-          category: true,
-        },
-      });
+      include: {
+        category: true,
+      },
+    });
+
+    // -----------------------------------------------------
+    // RETURN SAFE JSON
+    // -----------------------------------------------------
 
     return NextResponse.json(
       {
@@ -270,41 +197,32 @@ export async function POST(
         product: {
           id: product.id,
           name: product.name,
-          description:
-            product.description,
-          price: Number(
-            product.price
-          ),
-          costPrice: Number(
-            product.costPrice
-          ),
+          description: product.description,
+          price: Number(product.price),
+          costPrice: Number(product.costPrice),
           stock: product.stock,
-          imageUrl:
-            product.imageUrl,
-          isAvailable:
-            product.isAvailable,
-          businessId:
-            product.businessId,
-          categoryId:
-            product.categoryId,
-          category:
-            product.category.name,
-          createdAt:
-            product.createdAt,
+          imageUrl: product.imageUrl,
+          isAvailable: product.isAvailable,
+          businessId: product.businessId,
+          categoryId: product.categoryId,
+
+          category: {
+            id: product.category.id,
+            name: product.category.name,
+          },
+
+          createdAt: product.createdAt.toISOString(),
+          updatedAt: product.updatedAt.toISOString(),
         },
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error(
-      "CREATE PRODUCT ERROR:",
-      error
-    );
+    console.error("CREATE PRODUCT ERROR:", error);
 
     return NextResponse.json(
       {
-        error:
-          "Failed to create product.",
+        error: "Failed to create product.",
       },
       {
         status: 500,

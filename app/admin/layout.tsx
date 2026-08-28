@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { ReactNode } from "react";
@@ -6,14 +7,12 @@ import { useState } from "react";
 import {
   BarChart3,
   Bell,
-  Boxes,
   CircleDollarSign,
   LayoutDashboard,
   LogOut,
   Menu,
   Package,
   Receipt,
-  Settings,
   ShoppingCart,
   Tags,
   WalletCards,
@@ -59,11 +58,6 @@ const menuItems = [
     label: "Analytics",
     href: "/admin/analytics",
     icon: BarChart3,
-  },
-  {
-    label: "Notifications",
-    href: "/admin/notifications",
-    icon: Bell,
   },
 ];
 
@@ -153,20 +147,6 @@ export default function AdminLayout({
           {/* Bottom */}
 
           <div className="border-t border-white/[0.06] p-4">
-
-            <Link
-              href="/admin/settings"
-              className="flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium text-white/45 transition hover:bg-white/[0.06] hover:text-white"
-            >
-
-              <Settings
-                size={17}
-                strokeWidth={1.8}
-              />
-
-              Settings
-
-            </Link>
 
             <Link
               href="/admin/login"
@@ -298,23 +278,6 @@ export default function AdminLayout({
           <div className="border-t border-white/[0.06] p-4">
 
             <Link
-              href="/admin/settings"
-              onClick={() =>
-                setMobileMenuOpen(false)
-              }
-              className="flex items-center gap-3 rounded-2xl px-3.5 py-3.5 text-sm font-medium text-white/45 transition hover:bg-white/[0.06] hover:text-white"
-            >
-
-              <Settings
-                size={18}
-                strokeWidth={1.8}
-              />
-
-              Settings
-
-            </Link>
-
-            <Link
               href="/admin/login"
               onClick={() =>
                 setMobileMenuOpen(false)
@@ -417,6 +380,8 @@ export default function AdminLayout({
                     strokeWidth={1.8}
                   />
 
+                  {/* Notification dot */}
+
                   <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#C3D809]" />
 
                 </Link>
@@ -464,3 +429,4 @@ export default function AdminLayout({
     </div>
   );
 }
+

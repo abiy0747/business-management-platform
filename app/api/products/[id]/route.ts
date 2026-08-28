@@ -2,23 +2,37 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 // =========================================================
+// TYPES
+// =========================================================
+
+type RouteContext = {
+  params: Promise<{
+    id: string;
+  }>;
+};
+
+// =========================================================
 // UPDATE PRODUCT
+// PUT /api/products/[id]
 // =========================================================
 
 export async function PUT(
   request: Request,
-  context: {
-    params: Promise<{
-      id: string;
-    }>;
-  }
+  context: RouteContext
 ) {
   try {
-    const { id } =
-      await context.params;
+    const { id } = await context.params;
 
-    const body =
-      await request.json();
+    if (!id || typeof id !== "string") {
+      return NextResponse.json(
+        {
+          error: "Product ID is required.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
 
     const {
       businessId,
@@ -26,6 +40,7 @@ export async function PUT(
       description,
       price,
       costPrice,
+      stock,
       imageUrl,
       categoryId,
       isAvailable,
@@ -36,27 +51,12 @@ export async function PUT(
     // -----------------------------------------------------
 
     if (
-      !id ||
-      typeof id !== "string"
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Product ID is required.",
-        },
-        { status: 400 }
-      );
-    }
-
-    if (
-      typeof businessId !==
-        "string" ||
+      typeof businessId !== "string" ||
       !businessId.trim()
     ) {
       return NextResponse.json(
         {
-          error:
-            "Business ID is required.",
+          error: "Business ID is required.",
         },
         { status: 400 }
       );
@@ -68,52 +68,42 @@ export async function PUT(
     ) {
       return NextResponse.json(
         {
-          error:
-            "Product name is required.",
+          error: "Product name is required.",
         },
         { status: 400 }
       );
     }
 
     if (
-      typeof categoryId !==
-        "string" ||
+      typeof categoryId !== "string" ||
       !categoryId.trim()
     ) {
       return NextResponse.json(
         {
-          error:
-            "Category is required.",
+          error: "Category is required.",
         },
         { status: 400 }
       );
     }
 
-    const numericPrice =
-      Number(price);
-
-    const numericCostPrice =
-      Number(costPrice);
+    const numericPrice = Number(price);
+    const numericCostPrice = Number(costPrice);
 
     if (
-      !Number.isFinite(
-        numericPrice
-      ) ||
+      !Number.isFinite(numericPrice) ||
       numericPrice < 0
     ) {
       return NextResponse.json(
         {
           error:
-            "Default selling price must be a valid non-negative number.",
+            "Selling price must be a valid non-negative number.",
         },
         { status: 400 }
       );
     }
 
     if (
-      !Number.isFinite(
-        numericCostPrice
-      ) ||
+      !Number.isFinite(numericCostPrice) ||
       numericCostPrice < 0
     ) {
       return NextResponse.json(
@@ -130,20 +120,17 @@ export async function PUT(
     // -----------------------------------------------------
 
     const existingProduct =
-      await prisma.product.findFirst(
-        {
-          where: {
-            id,
-            businessId,
-          },
-        }
-      );
+      await prisma.product.findFirst({
+        where: {
+          id,
+          businessId,
+        },
+      });
 
     if (!existingProduct) {
       return NextResponse.json(
         {
-          error:
-            "Product not found.",
+          error: "Product not found.",
         },
         { status: 404 }
       );
@@ -154,14 +141,12 @@ export async function PUT(
     // -----------------------------------------------------
 
     const category =
-      await prisma.category.findFirst(
-        {
-          where: {
-            id: categoryId,
-            businessId,
-          },
-        }
-      );
+      await prisma.category.findFirst({
+        where: {
+          id: categoryId,
+          businessId,
+        },
+      });
 
     if (!category) {
       return NextResponse.json(
@@ -187,34 +172,27 @@ export async function PUT(
           name: name.trim(),
 
           description:
-            typeof description ===
-              "string" &&
+            typeof description === "string" &&
             description.trim()
               ? description.trim()
               : null,
 
           price: numericPrice,
 
-          costPrice:
-            numericCostPrice,
+          costPrice: numericCostPrice,
 
-          // IMPORTANT:
-          // Stock is intentionally NOT updated here.
-          //
-          // Product editing changes product information.
-          // Purchases change stock.
+          // Keep current stock.
+          // Purchases increase stock.
           // Sales decrease stock.
 
           imageUrl:
-            typeof imageUrl ===
-              "string" &&
+            typeof imageUrl === "string" &&
             imageUrl.trim()
               ? imageUrl.trim()
               : null,
 
           isAvailable:
-            typeof isAvailable ===
-            "boolean"
+            typeof isAvailable === "boolean"
               ? isAvailable
               : existingProduct.isAvailable,
 
@@ -226,45 +204,43 @@ export async function PUT(
         },
       });
 
+    // -----------------------------------------------------
+    // RETURN PRODUCT
+    // -----------------------------------------------------
+
     return NextResponse.json({
       success: true,
 
       product: {
         id: product.id,
         name: product.name,
-        description:
-          product.description,
-        price: Number(
-          product.price
-        ),
-        costPrice: Number(
-          product.costPrice
-        ),
+        description: product.description,
+        price: Number(product.price),
+        costPrice: Number(product.costPrice),
         stock: product.stock,
-        imageUrl:
-          product.imageUrl,
-        isAvailable:
-          product.isAvailable,
-        businessId:
-          product.businessId,
-        categoryId:
-          product.categoryId,
-        category:
-          product.category.name,
-        updatedAt:
-          product.updatedAt,
+        imageUrl: product.imageUrl,
+        isAvailable: product.isAvailable,
+        businessId: product.businessId,
+        categoryId: product.categoryId,
+
+        category: {
+          id: product.category.id,
+          name: product.category.name,
+        },
+
+        createdAt: product.createdAt.toISOString(),
+        updatedAt: product.updatedAt.toISOString(),
       },
     });
   } catch (error) {
-    console.error(
-      "UPDATE PRODUCT ERROR:",
-      error
-    );
+    console.error("UPDATE PRODUCT ERROR:", error);
 
     return NextResponse.json(
       {
         error:
-          "Failed to update product.",
+          error instanceof Error
+            ? error.message
+            : "Failed to update product.",
       },
       {
         status: 500,
@@ -275,51 +251,61 @@ export async function PUT(
 
 // =========================================================
 // DELETE PRODUCT
+// DELETE /api/products/[id]
 // =========================================================
 
 export async function DELETE(
   request: Request,
-  context: {
-    params: Promise<{
-      id: string;
-    }>;
-  }
+  context: RouteContext
 ) {
   try {
-    const { id } =
-      await context.params;
+    const { id } = await context.params;
 
-    if (
-      !id ||
-      typeof id !== "string"
-    ) {
+    // -----------------------------------------------------
+    // VALIDATE ID
+    // -----------------------------------------------------
+
+    if (!id || typeof id !== "string") {
       return NextResponse.json(
         {
-          error:
-            "Product ID is required.",
+          error: "Product ID is required.",
         },
         { status: 400 }
       );
     }
 
     // -----------------------------------------------------
-    // GET BUSINESS ID FROM QUERY
+    // GET BUSINESS ID
     // -----------------------------------------------------
 
-    const url = new URL(
-      request.url
-    );
+    let businessId: string | null = null;
 
-    const businessId =
-      url.searchParams.get(
-        "businessId"
-      );
+    // First try JSON body.
+    try {
+      const body = await request.json();
+
+      if (
+        body &&
+        typeof body.businessId === "string"
+      ) {
+        businessId = body.businessId;
+      }
+    } catch {
+      // Body is optional.
+    }
+
+    // If body doesn't contain it, try query string.
+    if (!businessId) {
+      const url = new URL(request.url);
+
+      businessId =
+        url.searchParams.get("businessId");
+    }
 
     if (!businessId) {
       return NextResponse.json(
         {
-          error:
-            "Business ID is required.",
+          error: "Business ID is required.",
         },
         { status: 400 }
       );
@@ -330,41 +316,37 @@ export async function DELETE(
     // -----------------------------------------------------
 
     const product =
-      await prisma.product.findFirst(
-        {
-          where: {
-            id,
-            businessId,
-          },
+      await prisma.product.findFirst({
+        where: {
+          id,
+          businessId,
+        },
 
-          include: {
-            _count: {
-              select: {
-                purchaseItems: true,
-                saleItems: true,
-              },
+        include: {
+          _count: {
+            select: {
+              purchaseItems: true,
+              saleItems: true,
             },
           },
-        }
-      );
+        },
+      });
 
     if (!product) {
       return NextResponse.json(
         {
-          error:
-            "Product not found.",
+          error: "Product not found.",
         },
         { status: 404 }
       );
     }
 
     // -----------------------------------------------------
-    // DON'T DELETE HISTORICAL PRODUCTS
+    // CHECK PRODUCT HISTORY
     // -----------------------------------------------------
 
     if (
-      product._count
-        .purchaseItems > 0 ||
+      product._count.purchaseItems > 0 ||
       product._count.saleItems > 0
     ) {
       return NextResponse.json(
@@ -377,7 +359,7 @@ export async function DELETE(
     }
 
     // -----------------------------------------------------
-    // DELETE
+    // DELETE PRODUCT
     // -----------------------------------------------------
 
     await prisma.product.delete({
@@ -386,21 +368,24 @@ export async function DELETE(
       },
     });
 
+    // -----------------------------------------------------
+    // SUCCESS
+    // -----------------------------------------------------
+
     return NextResponse.json({
       success: true,
-      message:
-        "Product deleted successfully.",
+      message: "Product deleted successfully.",
+      deletedProductId: product.id,
     });
   } catch (error) {
-    console.error(
-      "DELETE PRODUCT ERROR:",
-      error
-    );
+    console.error("DELETE PRODUCT ERROR:", error);
 
     return NextResponse.json(
       {
         error:
-          "Failed to delete product.",
+          error instanceof Error
+            ? error.message
+            : "Failed to delete product.",
       },
       {
         status: 500,
