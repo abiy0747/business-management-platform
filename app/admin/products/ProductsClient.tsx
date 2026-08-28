@@ -35,7 +35,6 @@ type Category = {
 };
 
 type ProductsClientProps = {
-  businessId: string;
   products: Product[];
   categories: Category[];
 };
@@ -70,7 +69,6 @@ const emptyForm: ProductForm = {
 };
 
 export default function ProductsClient({
-  businessId,
   products,
   categories,
 }: ProductsClientProps) {
@@ -332,7 +330,6 @@ export default function ProductsClient({
             },
 
             body: JSON.stringify({
-              businessId,
               name,
               description:
                 form.description.trim() ||
@@ -506,15 +503,6 @@ export default function ProductsClient({
           `/api/products/${product.id}`,
           {
             method: "DELETE",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body: JSON.stringify({
-              businessId,
-            }),
           }
         );
 

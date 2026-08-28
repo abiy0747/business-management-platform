@@ -34,7 +34,6 @@ type PurchaseItem = {
 };
 
 type PurchasesClientProps = {
-  businessId: string;
   products: Product[];
 };
 
@@ -51,7 +50,6 @@ function formatCurrency(
 }
 
 export default function PurchasesClient({
-  businessId,
   products,
 }: PurchasesClientProps) {
   const [search, setSearch] =
@@ -335,8 +333,6 @@ export default function PurchasesClient({
             },
 
             body: JSON.stringify({
-              businessId,
-
               supplier,
 
               items: cart.map(

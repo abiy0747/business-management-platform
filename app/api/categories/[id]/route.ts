@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getAdminSessionBusiness } from "@/lib/admin/session";
 
 // =========================================================
 // UPDATE CATEGORY
@@ -17,11 +19,26 @@ export async function PUT(
     const { id } =
       await context.params;
 
+    // -----------------------------------------------------
+    // AUTHENTICATION
+    // -----------------------------------------------------
+
+    const session =
+      await getAdminSessionBusiness();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized." },
+        { status: 401 }
+      );
+    }
+
+    const businessId = session.businessId;
+
     const body =
       await request.json();
 
     const {
-      businessId,
       name,
     } = body;
 
@@ -37,22 +54,6 @@ export async function PUT(
         {
           error:
             "Category ID is required.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    if (
-      typeof businessId !==
-        "string" ||
-      !businessId.trim()
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Business ID is required.",
         },
         {
           status: 400,
@@ -153,6 +154,13 @@ export async function PUT(
         },
       });
 
+    // -----------------------------------------------------
+    // INVALIDATE CACHED CATALOG
+    // -----------------------------------------------------
+
+    revalidateTag("catalog", "max");
+    revalidateTag("admin", "max");
+
     return NextResponse.json({
       success: true,
 
@@ -219,28 +227,20 @@ export async function DELETE(
     }
 
     // -----------------------------------------------------
-    // GET BUSINESS ID
+    // AUTHENTICATION
     // -----------------------------------------------------
 
-    const url =
-      new URL(request.url);
+    const session =
+      await getAdminSessionBusiness();
 
-    const businessId =
-      url.searchParams.get(
-        "businessId"
-      );
-
-    if (!businessId) {
+    if (!session) {
       return NextResponse.json(
-        {
-          error:
-            "Business ID is required.",
-        },
-        {
-          status: 400,
-        }
+        { error: "Unauthorized." },
+        { status: 401 }
       );
     }
+
+    const businessId = session.businessId;
 
     // -----------------------------------------------------
     // FIND CATEGORY
@@ -302,6 +302,13 @@ export async function DELETE(
         id: category.id,
       },
     });
+
+    // -----------------------------------------------------
+    // INVALIDATE CACHED CATALOG
+    // -----------------------------------------------------
+
+    revalidateTag("catalog", "max");
+    revalidateTag("admin", "max");
 
     return NextResponse.json({
       success: true,

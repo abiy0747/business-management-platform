@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
@@ -70,7 +71,7 @@ export default function AdminLoginPage() {
             </div>
 
             <p className="mt-6 text-[10px] font-bold uppercase tracking-[0.25em] text-black/35">
-              Power Mobile
+              Store
             </p>
 
             <h1 className="mt-2 text-[32px] font-black tracking-tight">
@@ -234,11 +235,28 @@ export default function AdminLoginPage() {
 
             </div>
 
+            {/* New sellers */}
+            <div className="mt-4 border-t border-black/[0.05] pt-4 text-center">
+
+              <p className="text-xs text-black/40">
+                New seller?{" "}
+
+                <Link
+                  href="/register"
+                  className="font-bold text-[#222022] transition hover:text-[#3d3d3d]"
+                >
+                  Create your store
+                </Link>
+
+              </p>
+
+            </div>
+
           </div>
 
           {/* Footer */}
           <p className="mt-6 text-center text-[9px] font-bold uppercase tracking-[0.15em] text-black/25">
-            Power Mobile • Management System
+            Business Management System
           </p>
 
         </div>

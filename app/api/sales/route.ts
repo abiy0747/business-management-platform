@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getAdminSessionBusiness } from "@/lib/admin/session";
 
 type SaleItemInput = {
   productId: string;
@@ -8,30 +10,34 @@ type SaleItemInput = {
 };
 
 type CreateSaleBody = {
-  businessId: string;
   items: SaleItemInput[];
 };
 
 export async function POST(request: Request) {
   try {
+    // -----------------------------------------------------
+    // AUTHENTICATION
+    // -----------------------------------------------------
+
+    const session =
+      await getAdminSessionBusiness();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized." },
+        { status: 401 }
+      );
+    }
+
+    const businessId = session.businessId;
+
     const body = (await request.json()) as CreateSaleBody;
 
-    const { businessId, items } = body;
+    const { items } = body;
 
     // =========================================================
     // VALIDATION
     // =========================================================
-
-    if (!businessId) {
-      return NextResponse.json(
-        {
-          error: "Business ID is required.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -298,6 +304,13 @@ export async function POST(request: Request) {
 
       return createdSale;
     });
+
+    // =========================================================
+    // INVALIDATE CACHED CATALOG + ADMIN DATA
+    // =========================================================
+
+    revalidateTag("catalog", "max");
+    revalidateTag("admin", "max");
 
     // =========================================================
     // SUCCESS RESPONSE

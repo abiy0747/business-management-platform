@@ -1,32 +1,32 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getAdminSessionBusiness } from "@/lib/admin/session";
 
 // =========================================================
 // GET CATEGORIES
 // =========================================================
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const url = new URL(request.url);
+    // -----------------------------------------------------
+    // AUTHENTICATION
+    // -----------------------------------------------------
 
-    const businessId =
-      url.searchParams.get("businessId");
+    const session =
+      await getAdminSessionBusiness();
 
-    if (!businessId) {
+    if (!session) {
       return NextResponse.json(
-        {
-          error: "Business ID is required.",
-        },
-        {
-          status: 400,
-        }
+        { error: "Unauthorized." },
+        { status: 401 }
       );
     }
 
     const categories =
       await prisma.category.findMany({
         where: {
-          businessId,
+          businessId: session.businessId,
         },
 
         include: {
@@ -85,33 +85,32 @@ export async function POST(
   request: Request
 ) {
   try {
+    // -----------------------------------------------------
+    // AUTHENTICATION
+    // -----------------------------------------------------
+
+    const session =
+      await getAdminSessionBusiness();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized." },
+        { status: 401 }
+      );
+    }
+
+    const businessId = session.businessId;
+
     const body =
       await request.json();
 
     const {
-      businessId,
       name,
     } = body;
 
     // -----------------------------------------------------
     // VALIDATION
     // -----------------------------------------------------
-
-    if (
-      typeof businessId !==
-        "string" ||
-      !businessId.trim()
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Business ID is required.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
 
     if (
       typeof name !== "string" ||
@@ -130,29 +129,6 @@ export async function POST(
 
     const categoryName =
       name.trim();
-
-    // -----------------------------------------------------
-    // VERIFY BUSINESS
-    // -----------------------------------------------------
-
-    const business =
-      await prisma.business.findUnique({
-        where: {
-          id: businessId,
-        },
-      });
-
-    if (!business) {
-      return NextResponse.json(
-        {
-          error:
-            "Business not found.",
-        },
-        {
-          status: 404,
-        }
-      );
-    }
 
     // -----------------------------------------------------
     // CHECK DUPLICATE CATEGORY
@@ -189,6 +165,13 @@ export async function POST(
           businessId,
         },
       });
+
+    // -----------------------------------------------------
+    // INVALIDATE CACHED CATALOG
+    // -----------------------------------------------------
+
+    revalidateTag("catalog", "max");
+    revalidateTag("admin", "max");
 
     return NextResponse.json(
       {

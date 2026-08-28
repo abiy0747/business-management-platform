@@ -6,48 +6,12 @@ import {
   Tag,
   Sparkles,
 } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { getNotificationsData } from "@/lib/catalog-data";
 
 export default async function NotificationsPage() {
-  // Get the first business
-  const business = await prisma.business.findFirst();
-
-  // Get active notifications for that business
-  const notifications = business
-    ? await prisma.notification.findMany({
-        where: {
-          businessId: business.id,
-          isActive: true,
-          OR: [
-            {
-              startDate: null,
-            },
-            {
-              startDate: {
-                lte: new Date(),
-              },
-            },
-          ],
-          AND: [
-            {
-              OR: [
-                {
-                  endDate: null,
-                },
-                {
-                  endDate: {
-                    gte: new Date(),
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      })
-    : [];
+  // Active notifications are cached to keep
+  // navigation to this page instant.
+  const notifications = await getNotificationsData();
 
   return (
     <main className="min-h-screen bg-[#F8F8F6] text-[#222022]">

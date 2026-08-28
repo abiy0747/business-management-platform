@@ -1,9 +1,16 @@
 "use client";
 
-import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 
-export default function PromoBanner() {
+type PromoBannerProps = {
+  imageUrl: string | null;
+  description: string | null;
+};
+
+export default function PromoBanner({
+  imageUrl,
+  description,
+}: PromoBannerProps) {
   return (
     <section className="relative mt-5 min-h-[185px] overflow-hidden rounded-[28px] bg-[#222022] shadow-[0_15px_40px_rgba(34,32,34,0.10)]">
 
@@ -23,7 +30,8 @@ export default function PromoBanner() {
         </h2>
 
         <p className="mt-2 max-w-[190px] text-xs leading-relaxed text-white/50">
-          Premium accessories for your everyday tech.
+          {description ||
+            "Premium accessories for your everyday tech."}
         </p>
 
         {/* Shop Now */}
@@ -38,13 +46,10 @@ export default function PromoBanner() {
       {/* ========================================================= */}
 
       <div className="absolute inset-y-0 right-0 z-0 w-[60%] overflow-hidden">
-        <Image
-          src="/images/store.jpg"
+        <img
+          src={imageUrl || "/images/store.jpg"}
           alt="Premium mobile accessories"
-          fill
-          priority
-          sizes="60vw"
-          className="object-cover transition-transform duration-700 hover:scale-105"
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 hover:scale-105"
         />
 
         {/* Very subtle image overlay */}

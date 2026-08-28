@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getAdminSessionBusiness } from "@/lib/admin/session";
 
 // =========================================================
 // TYPES
@@ -32,10 +34,24 @@ export async function PUT(
       );
     }
 
+    // -----------------------------------------------------
+    // AUTHENTICATION
+    // -----------------------------------------------------
+
+    const session = await getAdminSessionBusiness();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized." },
+        { status: 401 }
+      );
+    }
+
+    const businessId = session.businessId;
+
     const body = await request.json();
 
     const {
-      businessId,
       name,
       description,
       price,
@@ -49,18 +65,6 @@ export async function PUT(
     // -----------------------------------------------------
     // VALIDATION
     // -----------------------------------------------------
-
-    if (
-      typeof businessId !== "string" ||
-      !businessId.trim()
-    ) {
-      return NextResponse.json(
-        {
-          error: "Business ID is required.",
-        },
-        { status: 400 }
-      );
-    }
 
     if (
       typeof name !== "string" ||
@@ -205,6 +209,13 @@ export async function PUT(
       });
 
     // -----------------------------------------------------
+    // INVALIDATE CACHED CATALOG
+    // -----------------------------------------------------
+
+    revalidateTag("catalog", "max");
+    revalidateTag("admin", "max");
+
+    // -----------------------------------------------------
     // RETURN PRODUCT
     // -----------------------------------------------------
 
@@ -275,41 +286,19 @@ export async function DELETE(
     }
 
     // -----------------------------------------------------
-    // GET BUSINESS ID
+    // AUTHENTICATION
     // -----------------------------------------------------
 
-    let businessId: string | null = null;
+    const session = await getAdminSessionBusiness();
 
-    // First try JSON body.
-    try {
-      const body = await request.json();
-
-      if (
-        body &&
-        typeof body.businessId === "string"
-      ) {
-        businessId = body.businessId;
-      }
-    } catch {
-      // Body is optional.
-    }
-
-    // If body doesn't contain it, try query string.
-    if (!businessId) {
-      const url = new URL(request.url);
-
-      businessId =
-        url.searchParams.get("businessId");
-    }
-
-    if (!businessId) {
+    if (!session) {
       return NextResponse.json(
-        {
-          error: "Business ID is required.",
-        },
-        { status: 400 }
+        { error: "Unauthorized." },
+        { status: 401 }
       );
     }
+
+    const businessId = session.businessId;
 
     // -----------------------------------------------------
     // FIND PRODUCT
@@ -367,6 +356,13 @@ export async function DELETE(
         id: product.id,
       },
     });
+
+    // -----------------------------------------------------
+    // INVALIDATE CACHED CATALOG
+    // -----------------------------------------------------
+
+    revalidateTag("catalog", "max");
+    revalidateTag("admin", "max");
 
     // -----------------------------------------------------
     // SUCCESS

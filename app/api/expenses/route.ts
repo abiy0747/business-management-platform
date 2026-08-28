@@ -1,32 +1,32 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getAdminSessionBusiness } from "@/lib/admin/session";
 
 // =========================================================
 // GET EXPENSES
 // =========================================================
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const url = new URL(request.url);
+    // -----------------------------------------------------
+    // AUTHENTICATION
+    // -----------------------------------------------------
 
-    const businessId =
-      url.searchParams.get("businessId");
+    const session =
+      await getAdminSessionBusiness();
 
-    if (!businessId) {
+    if (!session) {
       return NextResponse.json(
-        {
-          error: "Business ID is required.",
-        },
-        {
-          status: 400,
-        }
+        { error: "Unauthorized." },
+        { status: 401 }
       );
     }
 
     const expenses =
       await prisma.expense.findMany({
         where: {
-          businessId,
+          businessId: session.businessId,
         },
         orderBy: {
           expenseDate: "desc",
@@ -81,36 +81,31 @@ export async function POST(
   request: Request
 ) {
   try {
+    // -----------------------------------------------------
+    // AUTHENTICATION
+    // -----------------------------------------------------
+
+    const session =
+      await getAdminSessionBusiness();
+
+    if (!session) {
+      return NextResponse.json(
+        { error: "Unauthorized." },
+        { status: 401 }
+      );
+    }
+
+    const businessId = session.businessId;
+
     const body =
       await request.json();
 
     const {
-      businessId,
       title,
       description,
       amount,
       expenseDate,
     } = body;
-
-    // -----------------------------------------------------
-    // VALIDATE BUSINESS ID
-    // -----------------------------------------------------
-
-    if (
-      typeof businessId !==
-        "string" ||
-      !businessId.trim()
-    ) {
-      return NextResponse.json(
-        {
-          error:
-            "Business ID is required.",
-        },
-        {
-          status: 400,
-        }
-      );
-    }
 
     // -----------------------------------------------------
     // VALIDATE TITLE
@@ -151,29 +146,6 @@ export async function POST(
         },
         {
           status: 400,
-        }
-      );
-    }
-
-    // -----------------------------------------------------
-    // VERIFY BUSINESS
-    // -----------------------------------------------------
-
-    const business =
-      await prisma.business.findUnique({
-        where: {
-          id: businessId,
-        },
-      });
-
-    if (!business) {
-      return NextResponse.json(
-        {
-          error:
-            "Business not found.",
-        },
-        {
-          status: 404,
         }
       );
     }
@@ -233,6 +205,12 @@ export async function POST(
           businessId,
         },
       });
+
+    // -----------------------------------------------------
+    // INVALIDATE CACHED ADMIN DATA
+    // -----------------------------------------------------
+
+    revalidateTag("admin", "max");
 
     // -----------------------------------------------------
     // RESPONSE

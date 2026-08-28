@@ -5,28 +5,23 @@ import {
   Package,
   Sparkles,
 } from "lucide-react";
-import { prisma } from "@/lib/prisma";
 import CategoriesClient from "@/components/catalog/CategoriesClient";
+import { getCategoriesData, getStoreData } from "@/lib/catalog-data";
 
 export default async function CategoriesPage() {
-  const categories = await prisma.category.findMany({
-    include: {
-      _count: {
-        select: {
-          products: true,
-        },
-      },
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+  const [categories, store] = await Promise.all([
+    getCategoriesData(),
+    getStoreData(),
+  ]);
 
   const categoryData = categories.map((category) => ({
     id: category.id,
     name: category.name,
-    productCount: category._count.products,
+    productCount: category.productCount,
   }));
+
+  const storeName = store?.name || "Store";
+  const categoryImageUrl = store?.categoryImageUrl || "/images/store.jpg";
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#F8F8F6] pb-24 text-[#222022]">
@@ -97,7 +92,7 @@ export default async function CategoriesPage() {
             <div className="absolute inset-y-0 right-0 w-[58%] overflow-hidden">
 
               <img
-                src="/images/store.jpg"
+                src={categoryImageUrl}
                 alt="Mobile accessories collection"
                 className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
               />
@@ -219,7 +214,7 @@ export default async function CategoriesPage() {
             <div className="absolute bottom-4 right-4 z-30">
 
               <span className="rounded-full border border-white/15 bg-black/20 px-3 py-1.5 text-[7px] font-bold uppercase tracking-[0.16em] text-white/65 backdrop-blur-md">
-                Power Mobile
+                {storeName}
               </span>
 
             </div>

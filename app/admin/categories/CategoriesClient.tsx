@@ -25,12 +25,10 @@ type Category = {
 };
 
 type CategoriesClientProps = {
-  businessId: string;
   categories: Category[];
 };
 
 export default function CategoriesClient({
-  businessId,
   categories: initialCategories,
 }: CategoriesClientProps) {
   const [
@@ -190,7 +188,6 @@ export default function CategoriesClient({
             },
 
             body: JSON.stringify({
-              businessId,
               name,
             }),
           }
@@ -274,9 +271,7 @@ export default function CategoriesClient({
     try {
       const response =
         await fetch(
-          `/api/categories/${category.id}?businessId=${encodeURIComponent(
-            businessId
-          )}`,
+          `/api/categories/${category.id}`,
           {
             method: "DELETE",
           }

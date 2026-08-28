@@ -1,23 +1,21 @@
+import { Suspense } from "react";
 import DashboardClient from "./DashboardClient";
-import { getDashboardData } from "@/lib/admin/dashboard";
-import { prisma } from "@/lib/prisma";
+import { getAdminDashboardData } from "@/lib/admin/data";
+import { requireAdminSession } from "@/lib/admin/session";
+import { AdminPageSkeleton } from "@/components/Skeletons";
 
-export default async function AdminDashboardPage() {
-  const business = await prisma.business.findFirst();
+export default function AdminDashboardPage() {
+  return (
+    <Suspense fallback={<AdminPageSkeleton />}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
 
-  if (!business) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-black/40">
-          No business found. Please run the seed script.
-        </p>
-      </div>
-    );
-  }
+async function DashboardContent() {
+  const business = await requireAdminSession();
 
-  const raw = await getDashboardData(business.id);
-
-  const data = JSON.parse(JSON.stringify(raw));
+  const data = await getAdminDashboardData(business.businessId);
 
   return <DashboardClient data={data} />;
 }

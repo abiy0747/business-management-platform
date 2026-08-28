@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
+import { getAdminSessionBusiness } from "@/lib/admin/session";
 
 // =========================================================
 // CREATE PRODUCT
@@ -11,7 +13,6 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const {
-      businessId,
       name,
       description,
       price,
@@ -23,20 +24,26 @@ export async function POST(request: Request) {
     } = body;
 
     // -----------------------------------------------------
-    // VALIDATION
+    // AUTHENTICATION
+    // The business is derived from the session, never from
+    // the client. This keeps every seller isolated from
+    // other sellers' data.
     // -----------------------------------------------------
 
-    if (
-      typeof businessId !== "string" ||
-      !businessId.trim()
-    ) {
+    const session = await getAdminSessionBusiness();
+
+    if (!session) {
       return NextResponse.json(
-        {
-          error: "Business ID is required.",
-        },
-        { status: 400 }
+        { error: "Unauthorized." },
+        { status: 401 }
       );
     }
+
+    const businessId = session.businessId;
+
+    // -----------------------------------------------------
+    // VALIDATION
+    // -----------------------------------------------------
 
     if (
       typeof name !== "string" ||
@@ -106,25 +113,6 @@ export async function POST(request: Request) {
     }
 
     // -----------------------------------------------------
-    // VERIFY BUSINESS
-    // -----------------------------------------------------
-
-    const business = await prisma.business.findUnique({
-      where: {
-        id: businessId,
-      },
-    });
-
-    if (!business) {
-      return NextResponse.json(
-        {
-          error: "Business not found.",
-        },
-        { status: 404 }
-      );
-    }
-
-    // -----------------------------------------------------
     // VERIFY CATEGORY
     // -----------------------------------------------------
 
@@ -185,6 +173,13 @@ export async function POST(request: Request) {
         category: true,
       },
     });
+
+    // -----------------------------------------------------
+    // INVALIDATE CACHED CATALOG
+    // -----------------------------------------------------
+
+    revalidateTag("catalog", "max");
+    revalidateTag("admin", "max");
 
     // -----------------------------------------------------
     // RETURN SAFE JSON

@@ -1,7 +1,8 @@
-
+import { Suspense } from "react";
 import Link from "next/link";
 import { ArrowLeft, Heart, Star } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { getProductData } from "@/lib/catalog-data";
+import { SimplePageSkeleton } from "@/components/Skeletons";
 
 type ProductPageProps = {
   params: Promise<{
@@ -16,19 +17,22 @@ function formatCurrency(value: number) {
   }).format(value);
 }
 
-export default async function ProductPage({
+export default function ProductPage({
+  params,
+}: ProductPageProps) {
+  return (
+    <Suspense fallback={<SimplePageSkeleton />}>
+      <ProductView params={params} />
+    </Suspense>
+  );
+}
+
+async function ProductView({
   params,
 }: ProductPageProps) {
   const { id } = await params;
 
-  const product = await prisma.product.findUnique({
-    where: {
-      id,
-    },
-    include: {
-      category: true,
-    },
-  });
+  const product = await getProductData(id);
 
   // =========================================================
   // PRODUCT NOT FOUND
@@ -108,6 +112,9 @@ export default async function ProductPage({
               <img
                 src={product.imageUrl}
                 alt={product.name}
+                width={500}
+                height={500}
+                decoding="async"
                 className="h-full w-full object-cover"
               />
             ) : (
@@ -148,7 +155,7 @@ export default async function ProductPage({
           {/* Category */}
 
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-black/40">
-            {product.category.name}
+            {product.category}
           </p>
 
           {/* Name */}
@@ -232,20 +239,24 @@ export default async function ProductPage({
               CONTACT SELLER
           ================================================= */}
 
-          <button
-            type="button"
-            disabled={
-              isOutOfStock ||
-              !product.isAvailable
-            }
-            className="mt-6 w-full rounded-2xl bg-[#222022] py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-[#C3D809] hover:text-[#222022] active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-black/10 disabled:text-black/30"
-          >
-            {isOutOfStock
-              ? "Out of Stock"
-              : !product.isAvailable
-                ? "Currently Unavailable"
-                : "Contact Seller"}
-          </button>
+          {isOutOfStock || !product.isAvailable ? (
+            <button
+              type="button"
+              disabled
+              className="mt-6 w-full cursor-not-allowed rounded-2xl bg-black/10 py-4 text-sm font-bold text-black/30"
+            >
+              {isOutOfStock
+                ? "Out of Stock"
+                : "Currently Unavailable"}
+            </button>
+          ) : (
+            <Link
+              href="/about"
+              className="mt-6 flex w-full items-center justify-center rounded-2xl bg-[#222022] py-4 text-sm font-bold text-white transition-all duration-300 hover:bg-[#C3D809] hover:text-[#222022] active:scale-[0.98]"
+            >
+              Contact Seller
+            </Link>
+          )}
 
           {/* Product ID */}
 

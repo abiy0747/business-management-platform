@@ -1,46 +1,29 @@
-import { prisma } from "@/lib/prisma";
+import { Suspense } from "react";
 import Link from "next/link";
 import {
   AlertTriangle,
   ArrowLeft,
   Package,
 } from "lucide-react";
+import { getAdminNotificationsData } from "@/lib/admin/data";
+import { requireAdminSession } from "@/lib/admin/session";
+import { AdminPageSkeleton } from "@/components/Skeletons";
 
-export default async function NotificationsPage() {
-  const business = await prisma.business.findFirst();
-
-  if (!business) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center px-5">
-        <div className="text-center">
-          <h2 className="text-lg font-black text-[#222022]">
-            No business found
-          </h2>
-
-          <p className="mt-2 text-sm text-black/40">
-            Please run the seed script first.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const products = await prisma.product.findMany({
-    where: {
-      businessId: business.id,
-      isAvailable: true,
-    },
-    include: {
-      category: true,
-    },
-    orderBy: {
-      stock: "asc",
-    },
-  });
-
-  const lowStockProducts = products.filter(
-    (product) => product.stock <= 2
+export default function NotificationsPage() {
+  return (
+    <Suspense fallback={<AdminPageSkeleton />}>
+      <NotificationsContent />
+    </Suspense>
   );
+}
+
+async function NotificationsContent() {
+  const business = await requireAdminSession();
+
+  const lowStockProducts =
+    await getAdminNotificationsData(
+      business.businessId
+    );
 
   return (
     <div className="min-h-screen px-4 py-6 sm:px-7 lg:px-10">
@@ -131,7 +114,7 @@ export default async function NotificationsPage() {
                     </h2>
 
                     <span className="rounded-full bg-black/[0.04] px-2.5 py-1 text-[10px] font-bold text-black/40">
-                      {product.category.name}
+                      {product.categoryName}
                     </span>
 
                   </div>

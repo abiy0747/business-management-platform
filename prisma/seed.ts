@@ -20,6 +20,16 @@ async function main() {
     data: {
       name: "Power Mobile",
       slug: "power-mobile",
+      address: "Wereta, Ethiopia",
+      phone: "+251 92 049 9857",
+      telegram: "@Abiy0747",
+      instagram: "@abiy_abena",
+      openingHours: "Every day • 8:00 AM – 8:00 PM",
+      description:
+        "Quality mobile accessories and useful everyday tech.",
+      aboutImageUrl: "/images/pp.jpg",
+      promoImageUrl: "/images/store.jpg",
+      categoryImageUrl: "/images/store.jpg",
     },
   });
 

@@ -34,7 +34,6 @@ type CartItem = {
 };
 
 type SalesClientProps = {
-  businessId: string;
   products: Product[];
 };
 
@@ -46,7 +45,6 @@ function formatCurrency(value: number) {
 }
 
 export default function SalesClient({
-  businessId,
   products,
 }: SalesClientProps) {
   const [search, setSearch] = useState("");
@@ -388,8 +386,6 @@ export default function SalesClient({
             },
 
             body: JSON.stringify({
-              businessId,
-
               items: cart.map(
                 (item) => ({
                   productId:

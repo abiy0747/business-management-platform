@@ -1,4 +1,7 @@
-import { prisma } from "@/lib/prisma";
+import { Suspense } from "react";
+import { getAdminAnalyticsData, getAdminAnalyticsDates } from "@/lib/admin/data";
+import { requireAdminSession } from "@/lib/admin/session";
+import { AdminPageSkeleton } from "@/components/Skeletons";
 
 // =========================================================
 // HELPERS
@@ -9,38 +12,6 @@ function formatCurrency(value: number) {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
-}
-
-function getStartOfDay(date: Date) {
-  const result = new Date(date);
-  result.setHours(0, 0, 0, 0);
-  return result;
-}
-
-function getStartOfWeek(date: Date) {
-  const result = getStartOfDay(date);
-  const day = result.getDay();
-  const difference = day === 0 ? 6 : day - 1;
-
-  result.setDate(result.getDate() - difference);
-
-  return result;
-}
-
-function getStartOfMonth(date: Date) {
-  return new Date(
-    date.getFullYear(),
-    date.getMonth(),
-    1
-  );
-}
-
-function getStartOfYear(date: Date) {
-  return new Date(
-    date.getFullYear(),
-    0,
-    1
-  );
 }
 
 function percentage(
@@ -55,146 +26,65 @@ function percentage(
 // PAGE
 // =========================================================
 
-export default async function AnalyticsPage() {
+export default function AnalyticsPage() {
+  return (
+    <Suspense fallback={<AdminPageSkeleton />}>
+      <AnalyticsContent />
+    </Suspense>
+  );
+}
+
+async function AnalyticsContent() {
   // =======================================================
   // BUSINESS
   // =======================================================
 
   const business =
-    await prisma.business.findFirst();
-
-  if (!business) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center px-5">
-        <div className="text-center">
-          <h2 className="text-lg font-black text-[#222022]">
-            No business found
-          </h2>
-
-          <p className="mt-2 text-sm text-black/40">
-            Please run the seed script first.
-          </p>
-        </div>
-      </div>
-    );
-  }
+    await requireAdminSession();
 
   // =======================================================
   // DATES
   // =======================================================
 
-  const now = new Date();
+  const dates =
+    await getAdminAnalyticsDates();
 
   const startOfToday =
-    getStartOfDay(now);
+    new Date(dates.startOfToday);
 
   const startOfTomorrow =
-    new Date(startOfToday);
-
-  startOfTomorrow.setDate(
-    startOfTomorrow.getDate() + 1
-  );
+    new Date(dates.startOfTomorrow);
 
   const startOfWeek =
-    getStartOfWeek(now);
+    new Date(dates.startOfWeek);
 
   const startOfNextWeek =
-    new Date(startOfWeek);
-
-  startOfNextWeek.setDate(
-    startOfNextWeek.getDate() + 7
-  );
+    new Date(dates.startOfNextWeek);
 
   const startOfMonth =
-    getStartOfMonth(now);
+    new Date(dates.startOfMonth);
 
   const startOfNextMonth =
-    new Date(
-      startOfMonth.getFullYear(),
-      startOfMonth.getMonth() + 1,
-      1
-    );
+    new Date(dates.startOfNextMonth);
 
   const startOfYear =
-    getStartOfYear(now);
+    new Date(dates.startOfYear);
 
   const startOfNextYear =
-    new Date(
-      startOfYear.getFullYear() + 1,
-      0,
-      1
-    );
+    new Date(dates.startOfNextYear);
 
   // =======================================================
   // DATABASE
   // =======================================================
 
-  const [
+  const {
     sales,
     expenses,
     purchases,
     products,
-  ] = await Promise.all([
-    prisma.sale.findMany({
-      where: {
-        businessId: business.id,
-      },
-
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-
-      orderBy: {
-        soldAt: "desc",
-      },
-    }),
-
-    prisma.expense.findMany({
-      where: {
-        businessId: business.id,
-      },
-
-      orderBy: {
-        expenseDate: "desc",
-      },
-    }),
-
-    prisma.purchase.findMany({
-      where: {
-        businessId: business.id,
-      },
-
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-      },
-
-      orderBy: {
-        purchasedAt: "desc",
-      },
-    }),
-
-    prisma.product.findMany({
-      where: {
-        businessId: business.id,
-      },
-
-      include: {
-        category: true,
-      },
-
-      orderBy: {
-        stock: "asc",
-      },
-    }),
-  ]);
+  } = await getAdminAnalyticsData(
+    business.businessId
+  );
 
   // =======================================================
   // ALL-TIME FINANCIALS

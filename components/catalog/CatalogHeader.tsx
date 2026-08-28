@@ -1,7 +1,15 @@
 import Link from "next/link";
 import {  Heart, MapPin } from "lucide-react";
 
-export default function CatalogHeader() {
+type CatalogHeaderProps = {
+  name: string;
+  location: string | null;
+};
+
+export default function CatalogHeader({
+  name,
+  location,
+}: CatalogHeaderProps) {
   return (
     <header className="px-5 pb-4 pt-6">
       <div className="flex items-center justify-between">
@@ -11,13 +19,15 @@ export default function CatalogHeader() {
           </p>
 
           <h1 className="mt-1 text-2xl font-black tracking-tight">
-            Power Mobile
+            {name}
           </h1>
 
-          <div className="mt-2 flex items-center gap-1 text-xs text-black/50">
-            <MapPin size={14} strokeWidth={1.8} />
-            <span>Bahir Dar</span>
-          </div>
+          {location && (
+            <div className="mt-2 flex items-center gap-1 text-xs text-black/50">
+              <MapPin size={14} strokeWidth={1.8} />
+              <span>{location}</span>
+            </div>
+          )}
         </div>
 
         <div className="flex items-center gap-2">

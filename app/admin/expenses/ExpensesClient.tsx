@@ -24,7 +24,6 @@ type Expense = {
 };
 
 type ExpensesClientProps = {
-  businessId: string;
   initialExpenses: Expense[];
 };
 
@@ -88,7 +87,6 @@ function isSameDay(dateA: Date, dateB: Date) {
 }
 
 export default function ExpensesClient({
-  businessId,
   initialExpenses,
 }: ExpensesClientProps) {
   const [expenses, setExpenses] =
@@ -320,7 +318,6 @@ export default function ExpensesClient({
           },
 
           body: JSON.stringify({
-            businessId,
             title: title.trim(),
             description:
               description.trim() || null,
@@ -407,7 +404,7 @@ export default function ExpensesClient({
 
     try {
       const response = await fetch(
-        `/api/expenses/${expenseId}?businessId=${businessId}`,
+        `/api/expenses/${expenseId}`,
         {
           method: "DELETE",
         }

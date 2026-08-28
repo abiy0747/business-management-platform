@@ -3,7 +3,8 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { signOut } from "next-auth/react";
 import {
   BarChart3,
   Bell,
@@ -13,6 +14,7 @@ import {
   Menu,
   Package,
   Receipt,
+  Settings,
   ShoppingCart,
   Tags,
   WalletCards,
@@ -59,6 +61,11 @@ const menuItems = [
     href: "/admin/analytics",
     icon: BarChart3,
   },
+  {
+    label: "Store Settings",
+    href: "/admin/settings",
+    icon: Settings,
+  },
 ];
 
 export default function AdminLayout({
@@ -66,6 +73,46 @@ export default function AdminLayout({
 }: AdminLayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] =
     useState(false);
+
+  const [businessName, setBusinessName] =
+    useState("");
+  const [adminName, setAdminName] = useState("");
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadStoreInfo() {
+      try {
+        const response = await fetch(
+          "/api/admin/settings",
+          { cache: "no-store" }
+        );
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+
+        if (active) {
+          setBusinessName(data.settings?.name || "");
+          setAdminName(data.adminName || "");
+        }
+      } catch {
+        // Ignore — keep fallback placeholders.
+      }
+    }
+
+    loadStoreInfo();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const brandName = businessName || "Store";
+  const profileName = adminName || "Admin";
+  const profileInitial = profileName.charAt(0).toUpperCase();
 
   return (
     <div className="min-h-screen bg-[#F6F6F3] text-[#222022]">
@@ -95,7 +142,7 @@ export default function AdminLayout({
                 </p>
 
                 <h1 className="mt-0.5 text-lg font-black tracking-tight">
-                  Power Mobile
+                  {brandName}
                 </h1>
 
               </div>
@@ -148,9 +195,10 @@ export default function AdminLayout({
 
           <div className="border-t border-white/[0.06] p-4">
 
-            <Link
-              href="/admin/login"
-              className="mt-1 flex items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium text-white/45 transition hover:bg-red-500/10 hover:text-red-300"
+            <button
+              type="button"
+              onClick={() => signOut({ callbackUrl: "/admin/login" })}
+              className="mt-1 flex w-full cursor-pointer items-center gap-3 rounded-2xl px-3.5 py-3 text-sm font-medium text-white/45 transition hover:bg-red-500/10 hover:text-red-300"
             >
 
               <LogOut
@@ -160,7 +208,7 @@ export default function AdminLayout({
 
               Logout
 
-            </Link>
+            </button>
 
           </div>
 
@@ -208,7 +256,7 @@ export default function AdminLayout({
                 </p>
 
                 <h1 className="mt-0.5 text-lg font-black tracking-tight">
-                  Power Mobile
+                  {brandName}
                 </h1>
 
               </div>
@@ -277,12 +325,13 @@ export default function AdminLayout({
 
           <div className="border-t border-white/[0.06] p-4">
 
-            <Link
-              href="/admin/login"
-              onClick={() =>
-                setMobileMenuOpen(false)
-              }
-              className="mt-1 flex items-center gap-3 rounded-2xl px-3.5 py-3.5 text-sm font-medium text-white/45 transition hover:bg-red-500/10 hover:text-red-300"
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                signOut({ callbackUrl: "/admin/login" });
+              }}
+              className="mt-1 flex w-full cursor-pointer items-center gap-3 rounded-2xl px-3.5 py-3.5 text-sm font-medium text-white/45 transition hover:bg-red-500/10 hover:text-red-300"
             >
 
               <LogOut
@@ -292,7 +341,7 @@ export default function AdminLayout({
 
               Logout
 
-            </Link>
+            </button>
 
           </div>
 
@@ -338,7 +387,7 @@ export default function AdminLayout({
                   </p>
 
                   <h1 className="text-base font-black">
-                    Power Mobile
+                    {brandName}
                   </h1>
 
                 </div>
@@ -391,13 +440,13 @@ export default function AdminLayout({
                 <div className="flex items-center gap-3 rounded-full border border-black/[0.06] bg-white py-1.5 pl-1.5 pr-3">
 
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#222022] text-[10px] font-black text-[#C3D809]">
-                    M
+                    {profileInitial}
                   </div>
 
                   <div className="hidden sm:block">
 
                     <p className="text-[10px] font-bold leading-none">
-                      Mulat
+                      {profileName}
                     </p>
 
                     <p className="mt-1 text-[8px] text-black/35">
