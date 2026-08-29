@@ -16,14 +16,19 @@ export type FavoriteProduct = {
   category: string;
   image: string;
   description?: string | null;
+  sellerSlug: string;
 };
 
 type FavoritesContextType = {
   favorites: FavoriteProduct[];
-  isFavorite: (id: string) => boolean;
-  toggleFavorite: (product: FavoriteProduct) => void;
-  removeFavorite: (id: string) => void;
-  clearFavorites: () => void;
+  getFavorites: (sellerSlug: string) => FavoriteProduct[];
+  isFavorite: (sellerSlug: string, id: string) => boolean;
+  toggleFavorite: (
+    sellerSlug: string,
+    product: Omit<FavoriteProduct, "sellerSlug">
+  ) => void;
+  removeFavorite: (sellerSlug: string, id: string) => void;
+  clearFavorites: (sellerSlug: string) => void;
 };
 
 const FavoritesContext = createContext<
@@ -82,46 +87,82 @@ export function FavoritesProvider({
     }
   }, [favorites, loaded]);
 
-  const isFavorite = (id: string) => {
+  const getFavorites = (sellerSlug: string) => {
+    return favorites.filter(
+      (product) => product.sellerSlug === sellerSlug
+    );
+  };
+
+  const isFavorite = (
+    sellerSlug: string,
+    id: string
+  ) => {
     return favorites.some(
-      (product) => product.id === id
+      (product) =>
+        product.sellerSlug === sellerSlug &&
+        product.id === id
     );
   };
 
   const toggleFavorite = (
-    product: FavoriteProduct
+    sellerSlug: string,
+    product: Omit<FavoriteProduct, "sellerSlug">
   ) => {
     setFavorites((current) => {
       const alreadyFavorite = current.some(
-        (item) => item.id === product.id
+        (item) =>
+          item.sellerSlug === sellerSlug &&
+          item.id === product.id
       );
 
       if (alreadyFavorite) {
         return current.filter(
-          (item) => item.id !== product.id
+          (item) =>
+            !(
+              item.sellerSlug === sellerSlug &&
+              item.id === product.id
+            )
         );
       }
 
-      return [...current, product];
+      return [
+        ...current,
+        {
+          ...product,
+          sellerSlug,
+        },
+      ];
     });
   };
 
-  const removeFavorite = (id: string) => {
+  const removeFavorite = (
+    sellerSlug: string,
+    id: string
+  ) => {
     setFavorites((current) =>
       current.filter(
-        (product) => product.id !== id
+        (product) =>
+          !(
+            product.sellerSlug === sellerSlug &&
+            product.id === id
+          )
       )
     );
   };
 
-  const clearFavorites = () => {
-    setFavorites([]);
+  const clearFavorites = (sellerSlug: string) => {
+    setFavorites((current) =>
+      current.filter(
+        (product) => product.sellerSlug !== sellerSlug
+      )
+    );
   };
 
   return (
     <FavoritesContext.Provider
       value={{
         favorites,
+        getFavorites,
         isFavorite,
         toggleFavorite,
         removeFavorite,

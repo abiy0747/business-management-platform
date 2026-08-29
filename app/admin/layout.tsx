@@ -17,6 +17,7 @@ import {
   Settings,
   ShoppingCart,
   Tags,
+  Users,
   WalletCards,
   X,
 } from "lucide-react";
@@ -68,6 +69,14 @@ const menuItems = [
   },
 ];
 
+const ownerMenuItems = [
+  {
+    label: "Sellers",
+    href: "/admin/sellers",
+    icon: Users,
+  },
+];
+
 export default function AdminLayout({
   children,
 }: AdminLayoutProps) {
@@ -77,6 +86,7 @@ export default function AdminLayout({
   const [businessName, setBusinessName] =
     useState("");
   const [adminName, setAdminName] = useState("");
+  const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -97,6 +107,7 @@ export default function AdminLayout({
         if (active) {
           setBusinessName(data.settings?.name || "");
           setAdminName(data.adminName || "");
+          setIsOwner(Boolean(data.isOwner));
         }
       } catch {
         // Ignore — keep fallback placeholders.
@@ -109,6 +120,10 @@ export default function AdminLayout({
       active = false;
     };
   }, []);
+
+  const visibleMenuItems = isOwner
+    ? [...menuItems, ...ownerMenuItems]
+    : menuItems;
 
   const brandName = businessName || "Store";
   const profileName = adminName || "Admin";
@@ -161,7 +176,7 @@ export default function AdminLayout({
 
             <div className="space-y-1">
 
-              {menuItems.map((item) => {
+              {visibleMenuItems.map((item) => {
 
                 const Icon = item.icon;
 
@@ -288,7 +303,7 @@ export default function AdminLayout({
 
             <div className="space-y-1">
 
-              {menuItems.map((item) => {
+              {visibleMenuItems.map((item) => {
 
                 const Icon = item.icon;
 

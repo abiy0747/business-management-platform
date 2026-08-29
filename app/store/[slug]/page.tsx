@@ -1,18 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  Camera,
-  Clock,
+  ArrowRight,
   MapPin,
-  Phone,
-  Send,
-  Star,
+  Package,
 } from "lucide-react";
 import {
   getStoreBySlug,
   getStoreCatalogData,
-  type CatalogProduct,
 } from "@/lib/catalog-data";
+import StoreBottomNav from "@/components/catalog/StoreBottomNav";
+import StoreCatalogProducts from "@/components/catalog/StoreCatalogProducts";
 
 type StorePageProps = {
   params: Promise<{
@@ -59,7 +57,7 @@ export default async function StorePage({
     : null;
 
   return (
-    <main className="min-h-screen bg-white text-[#222022]">
+    <main className="min-h-screen bg-white pb-24 text-[#222022]">
       <div className="mx-auto max-w-md">
 
         {/* ===================================================
@@ -145,51 +143,74 @@ export default async function StorePage({
         </div>
 
         {/* ===================================================
-            CATEGORIES
+            CATEGORY PREVIEW
         =================================================== */}
 
-        <div className="mt-7 overflow-x-auto px-5 pb-1">
-          <div className="flex gap-2">
+        {data.categories.length > 0 && (
+          <section className="mt-7 px-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-black/35">
+                  Browse collection
+                </p>
 
-            <Link
-              href={`/store/${store.slug}`}
-              className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition ${
-                selectedCategory === "All"
-                  ? "border-[#222022] bg-[#222022] text-white"
-                  : "border-black/10 bg-white text-black/50"
-              }`}
-            >
-              All
-            </Link>
+                <h2 className="mt-1 text-xl font-black tracking-tight">
+                  Categories
+                </h2>
+              </div>
 
-            {data.categories.map((category) => (
               <Link
-                key={category}
-                href={`/store/${store.slug}?category=${encodeURIComponent(
-                  category
-                )}`}
+                href={`/store/${store.slug}/categories`}
+                className="group flex items-center gap-1 text-sm font-bold transition-all duration-300 hover:text-[#222022]"
+              >
+                See all
+                <ArrowRight
+                  size={16}
+                  className="transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </Link>
+            </div>
+
+            <div className="mt-4 flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+              <Link
+                href={`/store/${store.slug}`}
                 className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition ${
-                  selectedCategory === category
+                  selectedCategory === "All"
                     ? "border-[#222022] bg-[#222022] text-white"
                     : "border-black/10 bg-white text-black/50"
                 }`}
               >
-                {category}
+                All
               </Link>
-            ))}
 
-          </div>
-        </div>
+              {data.categories.map((category) => (
+                <Link
+                  key={category}
+                  href={`/store/${store.slug}?category=${encodeURIComponent(
+                    category
+                  )}`}
+                  className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition ${
+                    selectedCategory === category
+                      ? "border-[#222022] bg-[#222022] text-white"
+                      : "border-black/10 bg-white text-black/50"
+                  }`}
+                >
+                  {category}
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ===================================================
             PRODUCTS
         =================================================== */}
 
-        <section className="px-5 pb-4 pt-6">
+        <section className="px-5 pb-4 pt-7">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-black">
               {selectedCategory === "All"
-                ? "All Products"
+                ? store.name
                 : selectedCategory}
             </h2>
 
@@ -203,178 +224,26 @@ export default async function StorePage({
 
           {filteredProducts.length === 0 ? (
             <div className="rounded-[24px] border border-black/[0.06] bg-[#F8F8F6] p-10 text-center">
-              <p className="text-sm font-bold text-black/40">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#C3D809]/20">
+                <Package size={22} />
+              </div>
+
+              <p className="mt-4 text-sm font-bold text-black/40">
                 No products in this category yet.
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
-              {filteredProducts.map((product) => (
-                <StoreProductCard
-                  key={product.id}
-                  product={product}
-                  slug={store.slug}
-                />
-              ))}
-            </div>
+            <StoreCatalogProducts
+              products={filteredProducts}
+              slug={store.slug}
+            />
           )}
         </section>
 
-        {/* ===================================================
-            STORE INFO
-        =================================================== */}
+        {/* Bottom navigation */}
+        <StoreBottomNav slug={store.slug} />
 
-        {(store.address ||
-          store.phone ||
-          store.telegram ||
-          store.instagram ||
-          store.openingHours) && (
-          <section className="px-5 pb-6 pt-2">
-            <div className="rounded-[28px] border border-black/[0.06] bg-[#F8F8F6] p-5">
-              <h2 className="mb-4 text-sm font-black">
-                Visit {store.name}
-              </h2>
-
-              <div className="grid grid-cols-1 gap-2.5">
-                {store.address && (
-                  <div className="flex items-start gap-3 rounded-2xl bg-white p-3.5">
-                    <MapPin size={16} className="mt-0.5 shrink-0 text-black/40" />
-                    <span className="text-xs font-semibold text-black/60">
-                      {store.address}
-                    </span>
-                  </div>
-                )}
-
-                {store.phone && (
-                  <a
-                    href={`tel:${store.phone}`}
-                    className="flex items-center gap-3 rounded-2xl bg-white p-3.5 transition hover:bg-[#C3D809]/10"
-                  >
-                    <Phone size={16} className="shrink-0 text-black/40" />
-                    <span className="text-xs font-semibold text-black/60">
-                      {store.phone}
-                    </span>
-                  </a>
-                )}
-
-                {store.telegram && (
-                  <a
-                    href={`https://t.me/${store.telegram.replace(/^@/, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-2xl bg-white p-3.5 transition hover:bg-[#C3D809]/10"
-                  >
-                    <Send size={16} className="shrink-0 text-black/40" />
-                    <span className="text-xs font-semibold text-black/60">
-                      {store.telegram}
-                    </span>
-                  </a>
-                )}
-
-                {store.instagram && (
-                  <a
-                    href={`https://instagram.com/${store.instagram.replace(/^@/, "")}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 rounded-2xl bg-white p-3.5 transition hover:bg-[#C3D809]/10"
-                  >
-                    <Camera size={16} className="shrink-0 text-black/40" />
-                    <span className="text-xs font-semibold text-black/60">
-                      {store.instagram}
-                    </span>
-                  </a>
-                )}
-
-                {store.openingHours && (
-                  <div className="flex items-center gap-3 rounded-2xl bg-white p-3.5">
-                    <Clock size={16} className="shrink-0 text-black/40" />
-                    <span className="text-xs font-semibold text-black/60">
-                      {store.openingHours}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
       </div>
     </main>
-  );
-}
-
-// =========================================================
-// STORE PRODUCT CARD
-//
-// A static, self-contained card so each seller's catalog
-// stays cleanly isolated (no shared favorites context).
-// =========================================================
-
-function StoreProductCard({
-  product,
-  slug,
-}: {
-  product: CatalogProduct;
-  slug: string;
-}) {
-  const href = `/store/${slug}/products/${product.id}`;
-
-  const isOutOfStock = product.stock <= 0;
-
-  return (
-    <article className="group overflow-hidden rounded-[22px] border border-black/10 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(34,32,34,0.08)]">
-      <Link href={href} className="block">
-        <div className="relative aspect-square overflow-hidden bg-[#f5f5f5]">
-          {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              loading="lazy"
-              decoding="async"
-              width={400}
-              height={400}
-              className="h-full w-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-sm text-black/25">
-              No image
-            </div>
-          )}
-
-          {isOutOfStock && (
-            <span className="absolute left-3 top-3 rounded-full bg-red-500 px-2.5 py-1 text-[9px] font-bold text-white">
-              Out of Stock
-            </span>
-          )}
-        </div>
-      </Link>
-
-      <div className="p-3.5">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-black/40">
-          {product.category}
-        </p>
-
-        <h3 className="mt-1 line-clamp-2 min-h-[40px] text-sm font-bold leading-5">
-          {product.name}
-        </h3>
-
-        <div className="mt-2 flex items-center gap-1">
-          <Star size={13} fill="currentColor" className="text-[#C3D809]" />
-          <span className="text-xs font-semibold">4.9</span>
-        </div>
-
-        <div className="mt-3">
-          <span className="text-base font-black">
-            {product.price.toLocaleString()} ETB
-          </span>
-        </div>
-
-        <Link
-          href={href}
-          className="mt-3 block w-full rounded-xl bg-[#222022] py-2.5 text-center text-xs font-bold text-white transition-all duration-300 hover:bg-[#C3D809] hover:text-[#222022] active:scale-[0.97]"
-        >
-          View product
-        </Link>
-      </div>
-    </article>
   );
 }

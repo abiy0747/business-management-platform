@@ -308,9 +308,46 @@ export async function getCategoriesData(): Promise<CatalogCategory[]> {
     return [];
   }
 
+  return businessCategoriesByBusinessId(business.id);
+}
+
+// =========================================================
+// CATEGORIES PAGE (MULTI-SELLER)
+//
+// Categories scoped to a single business, resolved by its
+// unique slug so each seller only ever sees their own
+// categories.
+// =========================================================
+
+export async function getStoreCategoriesData(
+  slug: string
+): Promise<CatalogCategory[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(CATALOG_TAG);
+
+  const business = await prisma.business.findUnique({
+    where: {
+      slug,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!business) {
+    return [];
+  }
+
+  return businessCategoriesByBusinessId(business.id);
+}
+
+async function businessCategoriesByBusinessId(
+  businessId: string
+): Promise<CatalogCategory[]> {
   const categories = await prisma.category.findMany({
     where: {
-      businessId: business.id,
+      businessId,
     },
     include: {
       _count: {

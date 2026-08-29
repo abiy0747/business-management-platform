@@ -20,12 +20,14 @@ type CatalogBrowserProps = {
   products: Product[];
   categories: string[];
   selectedCategory: string;
+  slug?: string;
 };
 
 export default function CatalogBrowser({
   products,
   categories,
   selectedCategory,
+  slug,
 }: CatalogBrowserProps) {
   const [search, setSearch] = useState("");
   const [category, setCategory] =
@@ -145,6 +147,7 @@ export default function CatalogBrowser({
             <ProductCard
               key={product.id}
               product={product}
+              slug={slug}
             />
           ))}
         </div>

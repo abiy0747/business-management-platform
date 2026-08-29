@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
@@ -231,23 +230,6 @@ export default function AdminLoginPage() {
 
               <p className="text-[9px] font-medium uppercase tracking-wider text-black/30">
                 Secure administrator access
-              </p>
-
-            </div>
-
-            {/* New sellers */}
-            <div className="mt-4 border-t border-black/[0.05] pt-4 text-center">
-
-              <p className="text-xs text-black/40">
-                New seller?{" "}
-
-                <Link
-                  href="/register"
-                  className="font-bold text-[#222022] transition hover:text-[#3d3d3d]"
-                >
-                  Create your store
-                </Link>
-
               </p>
 
             </div>

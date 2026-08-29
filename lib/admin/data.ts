@@ -593,6 +593,69 @@ export async function getAdminNotificationsData(
   }));
 }
 
+export type AdminSeller = {
+  id: string;
+  name: string;
+  email: string;
+  isActive: boolean;
+  isOwner: boolean;
+  createdAt: string;
+  business: {
+    id: string;
+    name: string;
+    slug: string | null;
+  };
+};
+
+// =========================================================
+// SELLERS PAGE (PLATFORM OWNER ONLY)
+//
+// Lists every seller (admin) together with the business they
+// belong to. This is global platform data — the page and its
+// API are protected by the owner check in requireOwnerSession().
+// =========================================================
+
+export async function getAdminSellersData(): Promise<AdminSeller[]> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag(ADMIN_TAG);
+
+  const admins = await prisma.admin.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      isActive: true,
+      isOwner: true,
+      createdAt: true,
+      business: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
+  return admins.map((admin) => ({
+    id: admin.id,
+    name: admin.name,
+    email: admin.email,
+    isActive: admin.isActive,
+    isOwner: admin.isOwner,
+    createdAt: admin.createdAt.toISOString(),
+    business: {
+      id: admin.business.id,
+      name: admin.business.name,
+      slug: admin.business.slug,
+    },
+  }));
+}
+
 // =========================================================
 // REVALIDATION
 // =========================================================

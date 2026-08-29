@@ -17,6 +17,7 @@ export type AdminSessionBusiness = {
   businessId: string;
   businessName: string;
   slug: string | null;
+  isOwner: boolean;
 };
 
 export async function getAdminSessionBusiness(): Promise<AdminSessionBusiness | null> {
@@ -32,6 +33,7 @@ export async function getAdminSessionBusiness(): Promise<AdminSessionBusiness | 
     },
     select: {
       businessId: true,
+      isOwner: true,
       business: {
         select: {
           name: true,
@@ -49,6 +51,7 @@ export async function getAdminSessionBusiness(): Promise<AdminSessionBusiness | 
     businessId: admin.businessId,
     businessName: admin.business.name,
     slug: admin.business.slug,
+    isOwner: admin.isOwner,
   };
 }
 
@@ -59,6 +62,19 @@ export async function requireAdminSession(): Promise<AdminSessionBusiness> {
 
   if (!session) {
     redirect("/admin/login");
+  }
+
+  return session;
+}
+
+// For platform-owner-only server components (admin pages).
+// Redirects unauthenticated users to the login page and any
+// signed-in non-owner away from the owner-only area.
+export async function requireOwnerSession(): Promise<AdminSessionBusiness> {
+  const session = await requireAdminSession();
+
+  if (!session.isOwner) {
+    redirect("/admin/dashboard");
   }
 
   return session;

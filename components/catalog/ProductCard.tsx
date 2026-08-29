@@ -18,15 +18,22 @@ type Product = {
 
 type ProductCardProps = {
   product: Product;
+  slug?: string;
 };
 
 export default function ProductCard({
   product,
+  slug,
 }: ProductCardProps) {
   const { isFavorite, toggleFavorite } =
     useFavorites();
 
-  const favorite = isFavorite(product.id);
+  const sellerSlug = slug || "";
+  const productHref = slug
+    ? `/store/${slug}/products/${product.id}`
+    : `/products/${product.id}`;
+
+  const favorite = isFavorite(sellerSlug, product.id);
 
   return (
     <article className="group overflow-hidden rounded-[22px] border border-black/10 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_15px_40px_rgba(34,32,34,0.08)]">
@@ -51,7 +58,7 @@ export default function ProductCard({
         {/* Favorite */}
         <button
           onClick={() =>
-            toggleFavorite({
+            toggleFavorite(sellerSlug, {
               id: product.id,
               name: product.name,
               price: product.price,
@@ -115,7 +122,7 @@ export default function ProductCard({
 
         {/* Product link */}
         <Link
-          href={`/products/${product.id}`}
+          href={productHref}
           className="mt-3 block w-full rounded-xl bg-[#222022] py-2.5 text-center text-xs font-bold text-white transition-all duration-300 hover:bg-[#C3D809] hover:text-[#222022] active:scale-[0.97]"
         >
           View product

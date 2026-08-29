@@ -9,20 +9,21 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useFavorites } from "@/context/FavoritesContext";
+import StoreBottomNav from "@/components/catalog/StoreBottomNav";
 
-export default function FavoritesPage() {
-  const {
-    favorites,
-    removeFavorite,
-    clearFavorites,
-  } = useFavorites();
+type StoreFavoritesPageProps = {
+  slug: string;
+};
 
-  const clearAll = () => {
-    const slugs = Array.from(
-      new Set(favorites.map((item) => item.sellerSlug))
-    );
-    slugs.forEach((slug) => clearFavorites(slug));
-  };
+export default function StoreFavoritesPage({
+  slug,
+}: StoreFavoritesPageProps) {
+  const { getFavorites, removeFavorite, clearFavorites } =
+    useFavorites();
+
+  const favorites = getFavorites(slug);
+
+  const storeHref = `/store/${slug}`;
 
   return (
     <main className="min-h-screen overflow-hidden bg-white pb-24 text-[#222022]">
@@ -41,9 +42,9 @@ export default function FavoritesPage() {
         >
           <div className="flex items-center gap-3">
             <Link
-              href="/catalog"
+              href={storeHref}
               className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/80 backdrop-blur-xl transition-all duration-300 hover:-translate-x-1 hover:border-[#C3D809] hover:bg-[#C3D809] active:scale-90"
-              aria-label="Back to catalog"
+              aria-label="Back to store"
             >
               <ArrowLeft
                 size={18}
@@ -65,7 +66,7 @@ export default function FavoritesPage() {
           {favorites.length > 0 && (
             <button
               type="button"
-              onClick={clearAll}
+              onClick={() => clearFavorites(slug)}
               className="flex h-9 items-center gap-2 rounded-full border border-black/10 px-3 text-[10px] font-bold text-black/50 transition-all hover:border-red-200 hover:bg-red-50 hover:text-red-500 active:scale-95"
             >
               <Trash2 size={14} />
@@ -191,7 +192,7 @@ export default function FavoritesPage() {
               </p>
 
               <Link
-                href="/catalog"
+                href={storeHref}
                 className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#222022] px-6 py-3 text-xs font-bold text-white transition-all duration-300 hover:bg-[#C3D809] hover:text-[#222022] active:scale-95"
               >
                 <ShoppingBag size={15} />
@@ -235,7 +236,7 @@ export default function FavoritesPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        removeFavorite(product.sellerSlug, product.id)
+                        removeFavorite(slug, product.id)
                       }
                       className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-[#C3D809] text-[#222022] shadow-sm transition-all hover:scale-110 active:scale-90"
                       aria-label={`Remove ${product.name} from favorites`}
@@ -262,7 +263,7 @@ export default function FavoritesPage() {
                     </p>
 
                     <Link
-                      href={`/products/${product.id}`}
+                      href={`/store/${slug}/products/${product.id}`}
                       className="mt-3 block w-full rounded-xl bg-[#222022] py-2.5 text-center text-xs font-bold text-white transition-all duration-300 hover:bg-[#C3D809] hover:text-[#222022] active:scale-[0.97]"
                     >
                       View product
@@ -277,6 +278,9 @@ export default function FavoritesPage() {
         {/* Bottom spacing */}
         <div className="h-8" />
       </div>
+
+      {/* Bottom navigation */}
+      <StoreBottomNav slug={slug} />
     </main>
   );
 }

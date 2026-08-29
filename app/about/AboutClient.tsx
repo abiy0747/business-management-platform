@@ -15,9 +15,16 @@ import type { StoreData } from "@/lib/catalog-data";
 
 type AboutClientProps = {
   store: StoreData | null;
+  slug?: string;
 };
 
-export default function AboutClient({ store }: AboutClientProps) {
+export default function AboutClient({
+  store,
+  slug,
+}: AboutClientProps) {
+  const homeHref = slug
+    ? `/store/${slug}`
+    : "/catalog";
   const name = store?.name || "Our Store";
   const address = store?.address || null;
   const phone = store?.phone || null;
@@ -62,7 +69,7 @@ export default function AboutClient({ store }: AboutClientProps) {
           className="relative z-30 flex items-center gap-3 px-5 pb-4 pt-6"
         >
           <Link
-            href="/catalog"
+            href={homeHref}
             aria-label="Back to catalog"
             className="group flex h-10 w-10 items-center justify-center rounded-full border border-black/10 bg-white/80 backdrop-blur-xl transition-all duration-300 hover:-translate-x-1 hover:border-[#C3D809] hover:bg-[#C3D809] active:scale-90"
           >
@@ -601,7 +608,7 @@ export default function AboutClient({ store }: AboutClientProps) {
           }}
           className="px-5 pb-8 pt-10"
         >
-          <Link href="/catalog">
+          <Link href={homeHref}>
             <motion.div
               whileHover={{
                 scale: 1.02,

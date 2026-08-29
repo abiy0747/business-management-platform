@@ -35,6 +35,7 @@ export async function GET() {
     return NextResponse.json({
       settings: admin.business,
       adminName: admin.name,
+      isOwner: admin.isOwner,
     });
   } catch (error) {
     console.error("GET SETTINGS ERROR:", error);

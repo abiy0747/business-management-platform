@@ -608,7 +608,7 @@ return ( <div className="px-4 pb-28 pt-6 sm:px-7 lg:px-10 lg:pb-10">
       </div>
 
       <h1 className="text-2xl font-black tracking-tight sm:text-3xl">
-        Good morning, Mulat.
+        Good morning, Admin.
       </h1>
 
       <p className="mt-1 text-sm text-black/40">

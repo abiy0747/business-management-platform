@@ -20,6 +20,7 @@ type Category = {
 
 type CategoriesClientProps = {
   categories: Category[];
+  slug?: string;
 };
 
 const icons = [
@@ -33,7 +34,14 @@ const icons = [
 
 export default function CategoriesClient({
   categories,
+  slug,
 }: CategoriesClientProps) {
+
+  const categoryHref = (name: string) =>
+    slug
+      ? `/store/${slug}?category=${encodeURIComponent(name)}`
+      : `/catalog?category=${encodeURIComponent(name)}`;
+
   return (
     <section className="grid grid-cols-2 gap-3 px-5 pt-6">
       {categories.map((category, index) => {
@@ -75,9 +83,7 @@ export default function CategoriesClient({
             }}
           >
             <Link
-              href={`/catalog?category=${encodeURIComponent(
-                category.name
-              )}`}
+              href={categoryHref(category.name)}
               className="group relative block overflow-hidden rounded-[25px] border border-black/10 bg-[#f8f8f6] p-5 transition-all duration-300 hover:border-[#C3D809]/60 hover:bg-white hover:shadow-[0_18px_45px_rgba(34,32,34,0.09)]"
             >
               {/* Background glow */}
