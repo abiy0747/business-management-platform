@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import StoreQrCode from "@/components/admin/StoreQrCode";
+import ImageUploader from "@/components/admin/ImageUploader";
 import {
   Save,
   Store,
@@ -12,7 +13,6 @@ import {
    Camera,
   Clock,
   FileText,
-  Image as ImageIcon,
   CheckCircle2,
   AlertCircle,
   LogIn,
@@ -481,6 +481,7 @@ export default function StoreSettingsPage() {
                 title="Store Logo"
                 description="Your main store logo."
                 value={settings.logoUrl}
+                field="logo"
                 onChange={(value) =>
                   updateField("logoUrl", value)
                 }
@@ -491,6 +492,7 @@ export default function StoreSettingsPage() {
                 title="About Page Image"
                 description="Image displayed on the About page card."
                 value={settings.aboutImageUrl}
+                field="about"
                 onChange={(value) =>
                   updateField("aboutImageUrl", value)
                 }
@@ -501,6 +503,7 @@ export default function StoreSettingsPage() {
                 title="Promo Bar Image"
                 description="Image displayed in the promotional card."
                 value={settings.promoImageUrl}
+                field="promo"
                 onChange={(value) =>
                   updateField("promoImageUrl", value)
                 }
@@ -511,6 +514,7 @@ export default function StoreSettingsPage() {
                 title="Category Page Image"
                 description="Image displayed on the category page card."
                 value={settings.categoryImageUrl}
+                field="category"
                 onChange={(value) =>
                   updateField(
                     "categoryImageUrl",
@@ -581,53 +585,22 @@ function ImageField({
   title,
   description,
   value,
+  field,
   onChange,
 }: {
   title: string;
   description: string;
   value: string;
+  field: string;
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-black/10 bg-[#f8f8f6] p-4">
-      <div className="mb-4 flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white">
-          <ImageIcon size={17} />
-        </div>
-
-        <div>
-          <h3 className="text-sm font-black">
-            {title}
-          </h3>
-
-          <p className="mt-1 text-[10px] leading-4 text-black/40">
-            {description}
-          </p>
-        </div>
-      </div>
-
-      {value && (
-        <div className="mb-3 overflow-hidden rounded-xl border border-black/10 bg-white">
-          <img
-            src={value}
-            alt={title}
-            className="h-40 w-full object-cover"
-          />
-        </div>
-      )}
-
-      <input
-        value={value}
-        onChange={(e) =>
-          onChange(e.target.value)
-        }
-        placeholder="Image URL"
-        className="w-full rounded-xl border border-black/10 bg-white px-3 py-3 text-xs font-medium outline-none transition focus:border-[#C3D809]"
-      />
-
-      <p className="mt-2 text-[9px] text-black/30">
-        Image upload will be connected in the next step.
-      </p>
-    </div>
+    <ImageUploader
+      label={title}
+      description={description}
+      value={value}
+      onChange={onChange}
+      field={field}
+    />
   );
 }

@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
+import ImageUploader from "@/components/admin/ImageUploader";
 
 type Product = {
   id: string;
@@ -1208,29 +1209,27 @@ export default function ProductsClient({
                 {/* IMAGE */}
 
                 <div>
-                  <label className="text-xs font-bold text-black/60">
-                    Image URL
-                    <span className="ml-1 font-normal text-black/25">
-                      optional
-                    </span>
-                  </label>
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className="text-xs font-bold text-black/60">
+                      Product Image
+                      <span className="ml-1 font-normal text-black/25">
+                        optional
+                      </span>
+                    </label>
+                  </div>
 
-                  <input
-                    type="url"
-                    value={
-                      form.imageUrl
-                    }
-                    onChange={(
-                      event
-                    ) =>
+                  <ImageUploader
+                    label="Product Image"
+                    description="Upload a photo of the product to show on your catalog."
+                    field="product"
+                    previewClassName="h-48"
+                    value={form.imageUrl}
+                    onChange={(value) =>
                       updateForm(
                         "imageUrl",
-                        event.target
-                          .value
+                        value
                       )
                     }
-                    placeholder="https://..."
-                    className="mt-2 h-12 w-full rounded-2xl border border-black/[0.08] bg-[#F8F8F6] px-4 text-sm outline-none focus:border-[#C3D809] focus:bg-white"
                   />
                 </div>
 
