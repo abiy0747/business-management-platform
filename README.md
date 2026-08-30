@@ -1,160 +1,109 @@
 # Business Management Platform
 
-**Manage products, inventory, sales, expenses, and business performance — all in one place.**
+**A modern business management platform for managing products, inventory, sales, expenses, and profit — all from one dashboard.**
 
-Business Management Platform is a modern, reusable business management system designed for local retailers and small businesses. It provides customers with a simple digital product catalog while giving business owners a powerful admin dashboard to manage products, inventory, sales, expenses, and profit analytics.
+A full-stack multi-seller platform that allows businesses to manage their store, products, stock, sales, expenses, and analytics. Each seller has their own business data and public catalog.
 
-The platform is initially being developed for **mobile accessories stores**, but its reusable architecture allows it to be adapted for other businesses such as shoe shops, clothing stores, electronics stores, beauty shops, and general retailers.
+🔗 **Live Demo:** `https://bizadmin.vercel.app`
 
-![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+🔗 **Admin Login:** `https://bizadmin.vercel.app/admin/login`
+
+🔑 **Demo Account**
+
+**Email**: abiy@gmail.com
+
+**Password**: Abiy@0747
+
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge\&logo=next.js\&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge\&logo=typescript\&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge\&logo=postgresql\&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge\&logo=prisma\&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge\&logo=tailwind-css\&logoColor=white)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=for-the-badge\&logo=cloudinary\&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge\&logo=vercel\&logoColor=white)
 
 ---
 
 ## ✨ Features
 
-### 🛍️ Customer Catalog
-
-- 📱 Mobile-friendly product catalog
-- 🔍 Product search
-- 🗂️ Product categories
-- 🖼️ Product images
-- 💰 Product prices
-- 📦 Product availability
-- 🚨 Out-of-stock indication
-- 📱 QR-code access
-- ⚡ Fast and responsive browsing
-
-### 🔐 Admin Dashboard
-
-- Secure admin authentication
-- Business dashboard
-- Product management
-- Category management
-- Product image management
-- Inventory management
-- Stock additions
-- Stock adjustments
-- Sales management
-- Sales history
-- Expense management
-
-### 📦 Inventory Management
-
-- Track available stock
-- Automatically reduce stock after sales
-- Add new stock
-- Low-stock alerts
-- Out-of-stock tracking
-- Inventory transaction history
-- Stock movement tracking
-
-### 💰 Sales & Profit Management
-
-- Record product sales
-- Automatically calculate sales totals
-- Track product cost
-- Calculate revenue
-- Calculate cost of goods sold
-- Calculate gross profit
-- Track business expenses
-- Calculate net profit
-
-### 📊 Business Analytics
-
-- Daily sales summary
-- Weekly sales summary
-- Monthly sales summary
-- Yearly sales summary
-- Revenue analysis
-- Profit/loss analysis
-- Expense analysis
-- Best-selling products
-- Most profitable products
-- Sales trends
-- Profit trends
-- Product performance analysis
-
-### 📑 Reports
-
-- Daily business reports
-- Weekly business reports
-- Monthly business reports
-- Yearly business reports
-- Custom date-range reports
-- Sales reports
-- Profit reports
-- Inventory reports
-- Expense reports
-- PDF/Excel export *(planned)*
+* 🏪 **Multi-Seller Support** — Multiple businesses can use the same platform
+* 📦 **Product Management** — Add, edit, delete, and manage products
+* 🗂️ **Category Management** — Organize products by categories
+* 📊 **Inventory Management** — Track stock and product availability
+* 💰 **Sales Management** — Record sales and calculate totals
+* 💵 **Profit & Loss** — Track revenue, costs, expenses, and profit
+* 📈 **Business Analytics** — View sales, revenue, cost, and profit statistics
+* 💸 **Expense Management** — Manage business expenses
+* 🖼️ **Image Uploads** — Upload product and store images with Cloudinary
+* ⚙️ **Store Settings** — Customize store information, logo, banners, and contact details
+* 🌐 **Public Catalog** — Each seller can have their own online product catalog
 
 ---
 
-## 🎯 Initial Target
+## 🛠️ Tech Stack
 
-The first version of the platform is being developed for:
-
-**📱 Mobile Accessories Stores**
-
-Example product categories:
-
-- Phone Cases
-- Chargers
-- USB Cables
-- Earphones
-- Headphones
-- Power Banks
-- Screen Protectors
-- Smart Watches
-- Bluetooth Speakers
-- Other Mobile Accessories
-
-The platform is designed so that the same system can later be customized and reused for other types of businesses.
+| Layer          | Technology           |
+| -------------- | -------------------- |
+| Framework      | Next.js (App Router) |
+| Language       | TypeScript           |
+| Database       | PostgreSQL           |
+| ORM            | Prisma               |
+| Styling        | Tailwind CSS         |
+| Image Storage  | Cloudinary           |
+| Authentication | Auth.js / NextAuth   |
+| Hosting        | Vercel               |
 
 ---
 
-## 🧠 Reusable Business Architecture
-
-The system is being designed as a reusable business platform rather than a single-store application.
-
-A business can have its own:
-
-- Business name
-- Logo
-- Branding
-- Products
-- Categories
-- Inventory
-- Sales
-- Expenses
-- Admin users
-- Analytics
-
-This allows the platform to be adapted for different businesses without rebuilding the entire application.
-
-Example:
+## 📁 Project Structure
 
 ```text
-Business Management Platform
-│
-├── Mobile Accessories Store
-│   ├── Products
-│   ├── Sales
-│   ├── Inventory
-│   └── Analytics
-│
-├── Shoe Store
-│   ├── Products
-│   ├── Sales
-│   ├── Inventory
-│   └── Analytics
-│
-└── Clothing Store
-    ├── Products
-    ├── Sales
-    ├── Inventory
-    └── Analytics
+business-management-platform/
+├── app/
+│   ├── admin/          # Admin dashboard
+│   ├── api/            # API routes
+│   └── ...             # Public pages
+├── components/         # Reusable components
+├── lib/                # Utilities & Prisma
+├── prisma/
+│   └── schema.prisma   # Database schema
+├── public/             # Static assets
+└── package.json
+```
+
+---
+
+## 🚀 Getting Started
+
+```bash
+git clone YOUR_GITHUB_REPOSITORY_URL
+cd business-management-platform
+npm install
+npm run dev
+```
+
+Create `.env.local` with your PostgreSQL, authentication, and Cloudinary environment variables.
+
+---
+
+## 🗺️ Roadmap
+
+
+* [ ] Advanced analytics
+* [ ] Low-stock notifications
+* [ ] Seller subscription plans
+
+
+---
+
+## 👤 Author
+
+**Abiy**
+
+GitHub: [@abiy0747](https://github.com/abiy0747)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License.
